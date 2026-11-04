@@ -77,6 +77,10 @@ Messages de l'ingénieur, mot pour mot (session du 04.11.2026). Les quatre captu
 > **T28** — « le repo sur github est créé et public (git@github.com:When-I-hit-the-wall/Woodwork.git). Comme pour woodcore, je souhaite avoir des skills implémentés dans le projet pour le développement du projet (voir …\Woodcore\.claude\skills). Peut-être existe-t-il des skills qui peuvent être utiles pour écrire du typst ? »
 >
 > **T29** — « donc pousse sur github ce que tu fais dans woodwork »
+>
+> **T30** — « de plus, créer les templates de formes et de fond déjà disponibles dans woodcore dans woodwork. Les templates de forme doivent être une uniquement commande à appeler qui règle les couleurs, les polices, les tailles de texte, les espaces, etc... Cela ne doit pas régler, par exemple, la page de titre. La page de titre doit être dans un template de fond 'titre-bfh' »
+>
+> **T31** — Réponses du 04.11.2026 : Q-007 « n'est-il pas possible d'utiliser la fonction de base #import "bfh.typ": bfh » ; Q-008 l'en-tête et le pied de page dans la forme ; Q-009 des squelettes à remplir ; Q-010 « titre-bfh et titre-neutral ».
 
 ## 3. Exigences fonctionnelles
 
@@ -164,6 +168,24 @@ Messages de l'ingénieur, mot pour mot (session du 04.11.2026). Les quatre captu
 - **Priorité** : devrait
 - **Critère d'acceptation** : `.claude/skills/typst-sheet/SKILL.md` existe et est utilisé par `implementation` pour écrire une feuille de la phase 1.
 
+### REQ-015 — Les templates de forme : un fichier, une fonction
+- **Exigence** : Woodwork doit livrer les trois formes de Woodcore (`neutral`, `compact`, `bfh`) dans `woodwork/forms/`, chacune un fichier qui exporte une fonction de son nom, appelée par la règle de Typst : `#import "/woodwork/forms/bfh.typ": bfh` puis `#show: bfh` (ou `#show: bfh.with(lang: "fr")`). Une forme règle les polices, les couleurs, les tailles, les espacements, les titres, les légendes, les marges, l'en-tête et le pied de page. Elle ne règle pas la page de titre.
+- **Source** : T30, T31 (Q-007, Q-008)
+- **Priorité** : doit
+- **Critère d'acceptation** : un document `#show: bfh` compile avec Lucida Sans (ou son remplacement), le gris de la BFH sur les titres, le logo en en-tête ; les trois formes compilent seules dans un projet vide (test) ; aucune forme n'imprime de page de titre.
+
+### REQ-016 — Les pages de titre sont des templates de fond
+- **Exigence** : Woodwork doit livrer `titre-bfh` et `titre-neutral`, des fichiers que l'utilisateur copie et remplit. Les champs de la page de titre de Woodcore (nom du projet, numéro, client, adresse, bureau, auteur, vérificateur, date, document) y sont écrits, plus lus dans `project.json`. La page de titre n'a ni en-tête ni pied de page. Elle existe en fr, de et en, et elle est générée depuis `source/`.
+- **Source** : T30, T31 (Q-010)
+- **Priorité** : doit
+- **Critère d'acceptation** : `titre-bfh` et `titre-neutral` compilent dans les trois langues avec la forme correspondante ; changer un champ dans le fichier le change sur la page (test).
+
+### REQ-017 — Les fonds de document en squelettes
+- **Exigence** : Woodwork doit livrer la convention d'utilisation, la base de projet et le rapport de statique de Woodcore en squelettes, en fr, de et en, générés depuis `source/`. Ils gardent les mêmes chapitres et le même texte. Là où Woodcore bouclait sur l'export (plans, positions, charges, modèles), il y a un emplacement commenté où l'utilisateur colle ses feuilles.
+- **Source** : T30, T31 (Q-009)
+- **Priorité** : doit
+- **Critère d'acceptation** : chacun des 9 squelettes compile avec la forme `bfh` et la page `titre-bfh` (test) ; aucun ne lit de fichier d'un projet Woodcore.
+
 ## 4. Exigences d'interface (rapport)
 
 ### UI-001 — Le rendu des captures
@@ -225,6 +247,7 @@ Messages de l'ingénieur, mot pour mot (session du 04.11.2026). Les quatre captu
 - **D-12** — L'affichage par défaut de Woodwork est le rendu des captures : la famille `block`, avec le libellé à gauche, la citation à droite, et la formule puis les valeurs puis le résultat. C'est aussi le préréglage `report`. Cela découle de REQ-008, où l'ingénieur a demandé ce rendu sans `level` ; la revue a montré que le niveau 3 actuel ne le donne pas (§13).
 - **D-13** — Les JSON de table sont publiés tels que Woodcore les a, avec leurs titres, libellés et notes ; seules les `_note` qui citent des chemins de Woodcore sont nettoyées (Q-005). Prix accepté : des libellés de la norme SIA sont publics.
 - **D-14** — La citation à droite s'écrit `norm-position: "right"` ; `"line-right"` est refusé avec un message qui donne le nouveau nom (Q-006).
+- **D-17** — Une forme est un fichier qui exporte une fonction de son nom, appelée par `#show:` (Q-007 : « la fonction de base ») ; la forme règle aussi l'en-tête et le pied de page (Q-008) ; les pages de titre et les documents sont des templates de fond (T30) ; deux pages de titre, BFH et neutre (Q-010) ; les documents en squelettes (Q-009).
 - **D-9** — Le travail fait dans Woodwork est poussé sur `origin/main` du dépôt public `When-I-hit-the-wall/Woodwork` (T29). L'autorisation vaut pour ce dépôt seul. Rien n'est poussé avant l'approbation de cette spécification, puisqu'il n'y a rien à pousser avant.
 
 ## 8. Hors périmètre
@@ -296,6 +319,9 @@ Messages de l'ingénieur, mot pour mot (session du 04.11.2026). Les quatre captu
 - [ ] REQ-012 — `origin` = `When-I-hit-the-wall/Woodwork`, chaque étape poussée sur `main`.
 - [ ] REQ-013 — CLAUDE.md, `docs/`, 8 skills et 4 agents propres à Woodwork ; la spec déplacée dans `Woodwork/docs/requirements/`.
 - [ ] REQ-014 — skill `typst-sheet` présent et utilisé.
+- [ ] REQ-015 — trois formes, `#show: bfh`, sans page de titre.
+- [ ] REQ-016 — `titre-bfh`, `titre-neutral` en fr/de/en, champs écrits dans le fichier.
+- [ ] REQ-017 — 9 squelettes de documents qui compilent.
 - [ ] UI-001 — rendu conforme aux captures ; mots du moteur selon `text.lang`.
 - [ ] UI-002 — un argument nommé par ligne dans `sheets/`.
 - [ ] ARCH-001 — compile sans Python.
@@ -338,6 +364,8 @@ Messages de l'ingénieur, mot pour mot (session du 04.11.2026). Les quatre captu
 | T27 | REQ-003, REQ-006, D-5, D-7 | décision |
 | T28 | REQ-012, REQ-013, REQ-014, CON-007, Q-004 | capturé ; skill Typst de base → question |
 | T29 | REQ-012, D-9 | décision |
+| T30 | REQ-015, REQ-016, REQ-017 | capturé |
+| T31 | D-17 | décision |
 
 ### Points de la source non résolus
 
@@ -446,6 +474,10 @@ Chaque étape se termine par un commit poussé sur `origin/main` du dépôt Wood
    - Woodcore : une entrée dans `docs/decisions.md` (la séparation, ce qu'elle coûte) et dans `CHANGELOG.md`.
    - Vérification indépendante (`verify-requirements`), puis `finish`.
 
+### Ajout au plan (T30, 04.11.2026)
+
+7b. **Formes, pages de titre, documents** (après le générateur, qui les génère comme les feuilles) : `woodwork/forms/{neutral,compact,bfh}.typ` tirés de `Woodcore/templates/forms/*/template.typ` (une fonction par fichier, le logo dans `woodwork/forms/`) ; `source/templates/titre-bfh.typ`, `titre-neutral.typ` tirés des `title.typ`, les champs en arguments écrits dans le fichier ; `source/templates/{cu,bp,rs}/` tirés de `Woodcore/templates/documents/*/standard/`, les boucles sur l'export remplacées par des emplacements commentés. Réalise REQ-015 à REQ-017. Tests : `test_templates.py`.
+
 ## 15. Vérification
 
 _(à écrire par `verify-requirements`)_
@@ -464,3 +496,4 @@ _(à écrire par `verify-requirements`)_
 | 2026-11-04 | implementation | étape 4 : `units:` vaut aussi pour les valeurs écrites (`to-domain-unit` : 12.4 kNm → 12 400 Nm), la ligne garde `unit:` ; `woodwork/data/presets.json` avec `report` ; `docs/typst/commands.md` écrit pour `#domain`, `#var`, `#eq`, `#verify`, les clés. Tests : `test_domain_defaults.py` (8), `test_units.py` (3), `test_preset.py` (4) — 25 passés en tout. REQ-005 à REQ-008, ARCH-003, ARCH-007. Reste : étapes 5 à 9 |
 | 2026-11-04 | implementation | étape 5 : `tools/import_norms.py` copie textuellement 57 tables de Woodcore (SIA 265:2021, SIA 265/1:2018, SIA 260:2013, SN EN 14592:2022, `norms.json`) dans `woodwork/data/<norme>/`, sans les extraits ; seules les `_note` qui citent du code ou des docs de Woodcore perdent la phrase ou la parenthèse ; `imported.json` garde l'origine et le commit. Écart au critère de REQ-010 : les noms gardent le titre allemand de Woodcore (`tab09-brettschichtholz.json`), le numéro de table y est, le nom anglais de l'exemple (`table-09-glulam.json`) n'est pas repris pour ne pas traduire 57 noms à la main. SIA 261, 263 et SZS C5 viendront avec les phases 2 et 3. Tests : `test_data.py` (5). REQ-010, CON-007. Reste : étapes 6 à 9 |
 | 2026-11-04 | implementation | étape 6 : `woodwork/lib/material.typ`, `#material` (Tab. 8 et 9, η_w Tab. 4, η_t 2.2.6, `my-materials/materials.json` livré vide, valeur de l'ingénieur, cas de f_c,90,d, `print:`), règle de Woodcore `Strengths._grade` ; écart à la spec : `as:` est un mot réservé de Typst, l'argument s'appelle `suffix:` (à confirmer par l'ingénieur) ; une ligne sans libellé garde la colonne des libellés vide. Le refus de C16 en traction (Tab. 8 note 2) n'est pas encore porté. Tests : `test_material.py` (11) — 41 passés. REQ-009. Reste : étapes 7 à 9 |
+| 2026-11-04 | implementation | étape 7 : `tools/generate.py` (`sheets/` et `templates/` en fr/de/en depuis `source/`, `--check`, clés `{mot-mot}` à deux mots au moins, `// @insert` des lignes partagées depuis `source/parts/`, noms traduits par `paths`) ; première feuille `tension-parallel` standard et détaillée, termes lus dans SIA 265:2021 FR et DE p. 31 ; figure dans `woodwork/figures/` (copiée avec le moteur). Ajout T30 (templates de forme et de fond) : REQ-015 à REQ-017, D-17, étape 7b. Tests : `test_generate.py` (7) — 48 passés. REQ-003, REQ-004, ARCH-004, UI-002. Reste : 7b, 8, 9 |

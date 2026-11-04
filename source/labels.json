@@ -1,0 +1,23 @@
+{
+  "_note": "Every word of a sheet or a content template, by key, in the three languages (tools/generate.py replaces each {key} of source/ by its text). The terms of a clause are those of the edition of the norm in that language (SIA 265:2021 DE and FR; English after EN 1995 where SIA has no English edition); `paths` names every folder and file in fr and de, English being the source's own name.",
+  "labels": {
+    "title-tension-parallel": {"fr": "Traction parallèle au fil", "de": "Zug in Faserrichtung", "en": "Tension parallel to the grain"},
+    "text-tension-parallel": {"fr": "Barre tendue, effort de traction centré, section non affaiblie.", "de": "Zugstab, mittige Zugkraft, ungeschwächter Querschnitt.", "en": "Tension member, centric tensile force, unweakened cross-section."},
+    "tension-force": {"fr": "Effort de traction", "de": "Zugkraft", "en": "Tensile force"},
+    "section-width": {"fr": "Largeur", "de": "Breite", "en": "Width"},
+    "section-height": {"fr": "Hauteur", "de": "Höhe", "en": "Height"},
+    "cross-sectional-area": {"fr": "Aire de la section", "de": "Querschnittsfläche", "en": "Cross-sectional area"},
+    "tensile-stress": {"fr": "Contrainte de traction", "de": "Zugspannung", "en": "Tensile stress"},
+    "tensile-strength": {"fr": "Résistance à la traction", "de": "Zugfestigkeit", "en": "Tensile strength"},
+    "tension-check": {"fr": "Vérification traction", "de": "Nachweis Zug", "en": "Tension check"},
+    "heading-material": {"fr": "Matériau", "de": "Baustoff", "en": "Material"},
+    "heading-action-and-section": {"fr": "Sollicitation et section", "de": "Beanspruchung und Querschnitt", "en": "Action effect and cross-section"},
+    "heading-check": {"fr": "Vérification", "de": "Nachweis", "en": "Check"}
+  },
+  "paths": {
+    "timber-sections": {"fr": "sections-bois", "de": "holzquerschnitte", "en": "timber-sections"},
+    "tension": {"fr": "traction", "de": "zug", "en": "tension"},
+    "tension-parallel": {"fr": "traction-axe", "de": "zug-parallel", "en": "tension-parallel"},
+    "detailed": {"fr": "detaille", "de": "detailliert", "en": "detailed"}
+  }
+}
