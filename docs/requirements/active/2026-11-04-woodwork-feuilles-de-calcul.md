@@ -1,7 +1,7 @@
 ---
 id: 2026-11-04-woodwork-feuilles-de-calcul
 titre: Woodwork — bibliothèque autonome de feuilles de calcul Typst
-status: approved
+status: implementation
 cree: 2026-11-04
 mis_a_jour: 2026-11-04
 source: message écrit (session du 04.11.2026, six messages) et artefact https://claude.ai/artifact/AAHzf9iDRPehnrmTQk7V8q (version 6)
@@ -9,6 +9,8 @@ docs: [docs/typst/formulas.md, docs/typst/api-conventions.md, docs/architecture/
 ---
 
 # Woodwork — Spécification
+
+> Écrite dans Woodcore (`docs/requirements/active/`) puis déplacée ici à l'étape 1 du plan. Les chemins de code nus (`lib/formula.typ`, `calc/domains/member_check.py`, `tests/test_member_check.py`) désignent les fichiers **de Woodcore** au 04.11.2026, dont Woodwork a été tiré.
 
 ## 1. Objectif
 
@@ -456,3 +458,5 @@ _(à écrire par `verify-requirements`)_
 | 2026-11-04 | specified | Q-001 (dossier dans le projet), Q-003 (pas de titre, lignes seulement), Q-004 (notre skill + tinymist) répondues ; D-10, D-11 |
 | 2026-11-04 | reviewed | revue d'architecture : APPROUVER AVEC RÉSERVES (§13) ; ARCH-005 à 007, D-12 ajoutés ; plan en 9 étapes (§14) ; Q-005 et Q-006 posées avec l'approbation |
 | 2026-11-04 | approved | approuvé par l'ingénieur ; Q-005 = tables telles que Woodcore (D-13), Q-006 = `"right"` (D-14). Reste : étapes 1 à 9 du plan |
+| 2026-11-04 | implementation | étape 1 (af5a4e6, poussé) : dépôt `../Woodwork` créé (`main`, `origin` = When-I-hit-the-wall/Woodwork), `.gitattributes` LF, `.gitignore`, `README.md`, `LICENSE` GPL-3 (repris de Woodcore, dont le moteur dérive), spec déplacée ici. REQ-012 en partie. Reste : étapes 2 à 9 |
+| 2026-11-04 | implementation | étape 2 : `CLAUDE.md`, `docs/` (README, principles, layout, conventions, typst/commands et engine en ébauche, decisions, TEMPLATE), `CHANGELOG.md` ; skills `requirements`, `big-feature`, `small-feature`, `architecture-review`, `implementation`, `verify-requirements`, `finish`, `issue`, `typst-sheet`, et `typst-writing-document` de Tinymist (Apache-2.0, `NOTICE.md`) ; 4 agents ; `tests/run_tests.py`, `conftest.py`, `test_tooling.py` (4 passés). REQ-013, REQ-014 en partie (le skill est utilisé à l'étape 8). Reste : étapes 3 à 9 |

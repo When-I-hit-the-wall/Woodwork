@@ -1,0 +1,7 @@
+# Writing
+
+- **Languages.** Code, comments, docs, commit messages: English. Specifications in `docs/requirements/` and the talk with the engineer: French. Sheets: three languages, generated (`source/labels.json`).
+- **Line endings.** Every text file is LF (`.gitattributes`). Python writes text with `encoding="utf-8", newline="\n"`; never `write_text` without them.
+- **Prose is not hard-wrapped.** One paragraph is one line, in every Markdown file and in every comment block.
+- **A sheet's source** (`source/…/<check>.typ`): a heading written by hand with its label key (`= {title} (SIA 265)`), then one `#domain` whose arguments are the defaults of its lines; one named argument per line, indented with a tab under its command; every visible word is a key `{like-this}` of `source/labels.json`; no `level`. The detailed source includes the lines of calculation it shares with the standard one rather than repeating them.
+- **Names.** Variable keys follow the engine's convention (`N_t_d`, `sigma_t_0_d`, `f_t_0_d`); file names are lower case with hyphens; in `source/`, file and folder names are English and `labels.json` gives their translations.

@@ -6,3 +6,4 @@ tests/.tmp/
 !figures/**/*.pdf
 .claude/settings.local.json
 .claude/worktrees/
+tests/.last-run.json
