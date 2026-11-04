@@ -1383,7 +1383,7 @@
 /// ```
 ///
 /// ```typ
-/// #var("s_k", domain: ("snow-load", "SL"))
+/// #var("s_k", 1.48, "kN/m²")
 /// ```
 ///
 /// **Without a value it prints a variable already declared** -- with everything it was declared with, its label, its citation and how it was shown, the level and the id aside -- and `unit:` shows it in another unit of the same dimension, for that line alone: the variable keeps its own, and the formulas below compute with it. `#val` and `#var-unit` were this until then.
@@ -1396,7 +1396,7 @@
 /// A value written down somewhere else is named with `domain:` -- a **pair** being a calculation of the export and its instance, a **string** a `#domain` of the report. The first is the short form of `#var("R_d", var-of("connector", "SD-10", "R_d"))`, and the two store exactly the same thing:
 ///
 /// ```typ
-/// #var("s_k", domain: ("snow-load", "SL"))
+/// #var("s_k", 1.48, "kN/m²")
 /// ```
 ///
 /// The second is what carries a result out of the column that computed it, so that a `#verify` below can name it -- a formula reads the current domain and the default one, and nothing else:
@@ -1404,12 +1404,6 @@
 /// ```typ
 /// #domain("Ende")[ #var("F", 0.55, "kN") ]
 /// #var("F", domain: "Ende")
-/// ```
-///
-/// A value **written beside** `domain:` is a literal checked by it: the number written is the one printed and computed with, and the export's is compared with it -- the same, nothing more; another, the written value is printed in red with the one the export now holds. It is how Woodcore writes a calculation it generates, so that the value can be read in the file and still cannot age unseen:
-///
-/// ```typ
-/// #var("s_k", 1.394, "kN/m²", domain: ("snow-load", "SL"))
 /// ```
 ///
 /// **What is printed, and where**: `display` says what of the line itself -- `"variable"`, `"value"`, `"value-unit"`, `"variable-value-unit"` or `"none"` --, and `label-position`, `descr-position` and `norm-position` where its label, its description and its citation go: `"before"` and `"after"` on the line, `"footnote"` in its one footnote, `"in-line"` after it in grey, `"right"` in the right-hand column, which sets the line apart. A level is a preset of them, and an argument written wins over it (`lib/display-presets.json`):
@@ -1469,7 +1463,7 @@
 /// - descr-position (str, auto): `"none"`, `"after"` (after the line, in parentheses), `"footnote"`. auto leaves it to the level -- the footnote from level 3, with the choices it explains.
 /// - norm (str, none), norm-section (str, none): the citation -- the norm, and its clause or table, «SIA 265 6.5.5.2».
 /// - norm-position (str, auto): `"none"`, `"in-line"` (after the line, in grey), `"right"` (in the right-hand column, the line then a block of its own), `"footnote"`. auto leaves it to the level -- the footnote from level 3.
-/// - id (str, none): the name the line is found by -- by Woodcore in its file, and by `typst query` -- wherever it is moved. Once per domain, for `#var`, `#eq` and `#verify` together.
+/// - id (str, none): the name the line is found by -- by `typst query` -- wherever it is moved. Once per domain, for `#var`, `#eq` and `#verify` together.
 /// - level (int, auto): a preset of the fine arguments above -- 0 nothing, 1 the line, 2 also the label, 3 also the description and the citation (`lib/display-presets.json`) --, which an argument written overrides. auto follows the domain, else the report.
 /// - norm-ref (str): written before `norm-section:`, which it is.
 /// -> content
@@ -2458,7 +2452,7 @@
 /// - label-width (length, ratio, relative, auto): the width of that column, as `#var`'s.
 /// - descr (str, none), descr-position (str, auto): why, and where -- `"none"`, `"after"`, `"footnote"`.
 /// - norm (str, none), norm-section (str, none), norm-position (str, auto): the citation, and where -- `"none"`, `"in-line"`, `"right"`, `"footnote"`.
-/// - id (str, none): the name the relation is found by -- by Woodcore in the file, and by `typst query` -- once per domain for `#var`, `#eq` and `#verify` together.
+/// - id (str, none): the name the relation is found by -- by `typst query` -- once per domain for `#var`, `#eq` and `#verify` together.
 /// - level (int, auto): a preset of `display` and the positions -- 0 nothing, 1 the symbols, 2 the values, 3 all of it --, which an argument written overrides.
 /// -> content
 #let verify(relation, name-calc: none, name-visible: none, display: auto, role: auto, label: none, label-position: auto, label-width: auto, descr: none, descr-position: auto, norm: none, norm-section: none, norm-position: auto, id: none, level: auto) = {

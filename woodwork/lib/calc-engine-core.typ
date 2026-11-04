@@ -11,16 +11,16 @@
 #import "subscript.typ": *
 
 // --- Report level (docs/typst/report-engine.md §4) -----------------------------------
-/// The report's default level of detail, 1, 2 or 3 (section 3.7). Set once in `Statischer Rapport.typ` — `#report-level.update(2)` — from `--input level=`; any call overrides it locally with `level:`.
+/// The report's default level of detail, 1, 2 or 3 (section 3.7). Set once in a document — `#report-level.update(2)` — from `--input level=`; any call overrides it locally with `level:`.
 ///
 /// ```typ
 /// #report-level.update(3)
-/// #var("s_k", domain: ("snow-load", "SL"))
+/// #var("s_k", 1.48, "kN/m²")
 /// ```
 ///
 /// ```typ
 /// #report-level.update(1)
-/// #var("s_k", domain: ("snow-load", "SL"))
+/// #var("s_k", 1.48, "kN/m²")
 /// ```
 ///
 /// -> state
@@ -135,7 +135,7 @@
 /// ```
 ///
 /// ```typ
-/// #var("q_k", domain: ("live-load", "A1"), level: 0)
+/// #var("q_k", 3, "kN/m²", level: 0)
 /// #context fmt-number(get("q_k", "value") * 0.7, get("q_k", "unit"))
 /// ```
 ///
@@ -417,7 +417,7 @@
 /// ```
 ///
 /// ```typ
-/// #var("ce", domain: ("snow-load", "SL"), level: 0)
+/// #var("ce", 1, level: 0)
 /// #context render-prose(tl-str(get("ce", "description")))
 /// ```
 ///
