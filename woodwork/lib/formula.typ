@@ -1187,7 +1187,7 @@
   [#metadata(plain(fields))<woodcore-var>]
 }
 
-#let var-argument-names = ("name-calc", "name-visible", "value", "unit", "domain", "display", "style", "role", "label", "label-position", "label-width", "descr", "descr-position", "norm", "norm-section", "norm-position", "id", "level")
+#let var-argument-names = ("name-calc", "name-visible", "value", "unit", "from", "path", "domain", "display", "style", "role", "label", "label-position", "label-width", "descr", "descr-position", "norm", "norm-section", "norm-position", "id", "level")
 
 // A value carried from one unit into another: the number as `to` writes it, or -- where the two are not the same dimension -- the value left exactly as it was, with the warning the caller prints in red. The one piece of arithmetic `#var`, `#var-unit` and a data value handed a unit all share.
 //
@@ -1220,6 +1220,41 @@
   if want == none or want == u { return r }
   let c = converted("var", r.at("symbol", default: ""), r.value, u, want)
   r + (value: c.value, unit: c.unit)
+}
+
+// --- A value read from woodwork/data/ (founding spec Q-011) ------------------------------------
+// `#var("beta_c", from: "sia265/4.2.8-knicken", path: "clause.beta_c.Brettschichtholz")`: the file is `woodwork/data/<from>.json`, the path its keys joined by dots -- an element of a list named by its `id` (`table_47.grades.C24.E_0_05`). The value is a number, or the `value` of the object the path ends on; its unit the one the file's `units` gives it, else the line's `unit:`, else none; its citation the norm and clause of the innermost object on the path that names one (`norm_ref`).
+#let data-value(fn, from, path) = {
+  if type(from) != str or from == "" { panic(fn + ": from: is a file of woodwork/data/ without .json, \"sia265/4.2.8-knicken\" -- got " + repr(from)) }
+  if type(path) != str or path == "" { panic(fn + ": path: is the keys to the value, joined by dots, \"clause.beta_c.Brettschichtholz\" -- got " + repr(path)) }
+  let node = json("../data/" + from + ".json")
+  let norm = none
+  let norm-ref = ""
+  let unit-map = (:)
+  let walked = ()
+  for part in path.split(".") {
+    if type(node) == dictionary {
+      if "norm_ref" in node { norm = node.at("norm", default: norm); norm-ref = node.norm_ref }
+      if not (part in node) {
+        panic(fn + ": " + from + " has no " + repr(part) + (if walked.len() > 0 { " under " + walked.join(".") } else { "" }) + " -- it has " + node.keys().filter(k => not k.starts-with("_")).map(k => repr(k)).join(", "))
+      }
+      // the units a table gives its columns hold for every row under it (`table_48.units` for `table_48.grades.GL24h.E_0_05`)
+      let units = node.at("units", default: none)
+      if type(units) == dictionary { unit-map = units }
+      node = node.at(part)
+    } else if type(node) == array {
+      let found = node.find(e => type(e) == dictionary and str(e.at("id", default: "")) == part)
+      if found == none { panic(fn + ": " + from + " has no element " + repr(part) + " in " + walked.join(".") + " -- its ids are " + node.map(e => repr(str(e.at("id", default: "?")))).join(", ")) }
+      node = found
+    } else {
+      panic(fn + ": " + from + ": " + walked.join(".") + " is a value, with no " + repr(part) + " under it")
+    }
+    walked.push(part)
+  }
+  if type(node) == dictionary and "value" in node { node = node.value }
+  if type(node) not in (int, float) { panic(fn + ": " + from + ": " + path + " is not a number -- it is " + repr(node)) }
+  let unit = unit-map.at(path.split(".").last(), default: none)
+  (value: node, unit: unit, norm: norm, norm_ref: norm-ref)
 }
 
 // The relative gap under which a value written beside `domain:` is taken as the one it names (docs/typst/formulas.md, «a literal checked by domain:», spec 2026-10-15). One constant for Typst; Python writes a value it unfolds with at least this precision (calc/domains/unfold.py LITERAL_TOLERANCE, held equal by tests/test_unfold.py).
@@ -1436,7 +1471,7 @@
 /// - level (int, auto): a preset of the fine arguments above -- 0 nothing, 1 the line, 2 also the label, 3 also the description and the citation (`lib/display-presets.json`) --, which an argument written overrides. auto follows the domain, else the report.
 /// - norm-ref (str): written before `norm-section:`, which it is.
 /// -> content
-#let var(..rest, name-calc: none, name-visible: none, value: none, unit: none, domain: none, display: auto, style: auto, role: auto, label: none, label-position: auto, label-width: auto, descr: none, descr-position: auto, norm: none, norm-section: none, norm-ref: "", norm-position: auto, id: none, level: auto) = {
+#let var(..rest, name-calc: none, name-visible: none, value: none, unit: none, from: none, path: none, domain: none, display: auto, style: auto, role: auto, label: none, label-position: auto, label-width: auto, descr: none, descr-position: auto, norm: none, norm-section: none, norm-ref: "", norm-position: auto, id: none, level: auto) = {
   // ⚠️ The named arguments are declared one by one rather than swept into `..rest`, and that is what an editor reads: a function whose whole signature is `..args` shows as `var(args: arguments)` in a tooltip, and `label:`, `level:`, `norm:` are then invisible to the engineer writing the call (v0.63.1). Only the *positional* tail stays variadic, because the printed symbol is an optional second positional and Typst has no optional positionals.
   // ⚠️ `panic` inside an `if`, not `assert(cond, message: ...)`: Typst builds an assert's message *before* it tests the condition, so `unknown.first()` on an empty array fails every correct call.
   let unknown = rest.named().keys()
@@ -1452,6 +1487,16 @@
   if name-visible != none {
     if tail.len() > 0 and type(tail.first()) == str { panic("var: " + repr(key) + " is given its symbol twice, by position and as name-visible:") }
     tail = (name-visible,) + tail
+  }
+  // a value read from woodwork/data/ (Q-011): written by name, with its unit and citation where the file gives them and the line does not
+  if from != none or path != none {
+    if from == none or path == none { panic("var: from: and path: go together -- from: \"sia265/4.2.8-knicken\", path: \"clause.beta_c.Brettschichtholz\"") }
+    if value != none or tail.filter(x => type(x) != str).len() > 0 { panic("var: " + repr(key) + " is read from " + from + " -- write no value beside from:") }
+    let got = data-value("var", from, path)
+    value = got.value
+    if unit == none and got.unit != none { unit = got.unit }
+    if norm == none { norm = got.norm }
+    if norm-section == none and norm-ref == "" and got.norm_ref != "" { norm-section = got.norm_ref }
   }
   let declared-by-name = value != none
   if declared-by-name {
@@ -1606,7 +1651,41 @@
   }
 }
 
-#let eq-argument-names = ("name-calc", "name-visible", "equation", "unit", "as-unit", "value", "display-formula", "display-equation", "style", "stack", "role", "label", "label-position", "label-width", "descr", "descr-position", "norm", "norm-section", "norm-position", "id", "level")
+// --- A formula by cases (founding spec Q-012) -----------------------------------------------------
+// `#eq("k_m", cases: ((`lambda_rel_m <= 0.75`, `1`), (`lambda_rel_m <= 1.4`, `1.56 - 0.75 * lambda_rel_m`), (auto, `1 / lambda_rel_m^2`)))`: the first condition that holds chooses the formula; `auto` holds always, and stands last. A condition is a relation between two formulas, read as #verify reads one.
+#let case-ops = ("<=", ">=", "!=", "==", "≤", "≥", "≠", "<", ">", "=")
+#let case-source(x) = star-as-dot(if type(x) == str { x } else if type(x) == content and x.func() == raw { x.text } else { panic("eq: cases: a condition and a formula are written in a raw block, `a <= b` -- got " + repr(x)) })
+#let check-cases(cases) = {
+  if type(cases) != array or cases.len() == 0 { panic("eq: cases: is a list of (condition, formula) pairs, the last condition auto -- got " + repr(cases)) }
+  for (i, c) in cases.enumerate() {
+    if type(c) != array or c.len() != 2 { panic("eq: cases: each case is a pair (condition, formula) -- the case " + str(i + 1) + " is " + repr(c)) }
+    if c.at(0) == auto and i != cases.len() - 1 { panic("eq: cases: auto, the case that always holds, stands last") }
+  }
+  if cases.last().at(0) != auto { panic("eq: cases: the last case is (auto, `formula`), so that one always holds") }
+  cases.map(c => (cond: if c.at(0) == auto { auto } else { case-source(c.at(0)) }, formula: case-source(c.at(1))))
+}
+// The index of the first case whose condition holds, read against the registry.
+#let pick-case(d, srcs) = {
+  for (i, c) in srcs.enumerate() {
+    if c.cond == auto { return i }
+    let op = case-ops.find(o => c.cond.contains(o))
+    if op == none { panic("eq: cases: " + repr(c.cond) + " is no relation -- write one of " + case-ops.join(", ")) }
+    let at = c.cond.position(op)
+    let sides = (c.cond.slice(0, at), c.cond.slice(at + op.len())).map(x => {
+      let got = evaluate-formula("eq", d, x.trim())
+      if got.result == none { panic("eq: cases: cannot evaluate " + repr(x.trim())) }
+      got.result
+    })
+    let (l, r) = (sides.at(0), sides.at(1))
+    if not dims-equal(l.dims, r.dims) { panic("eq: cases: " + repr(c.cond) + " compares two quantities of different dimensions") }
+    let (a, b) = (l.base, r.base)
+    let holds = if op in ("<=", "≤") { a <= b } else if op in (">=", "≥") { a >= b } else if op == "<" { a < b } else if op == ">" { a > b } else if op in ("!=", "≠") { a != b } else { a == b }
+    if holds { return i }
+  }
+  srcs.len() - 1
+}
+
+#let eq-argument-names = ("name-calc", "name-visible", "equation", "cases", "unit", "as-unit", "value", "display-formula", "display-equation", "style", "stack", "role", "label", "label-position", "label-width", "descr", "descr-position", "norm", "norm-section", "norm-position", "id", "level")
 
 // A formula with its numbers put in and their units left out -- what `display-formula: "value"` prints (REQ-001): `formula-lines`'s numbers, each a bare number.
 #let formula-bare(src, operands) = {
@@ -1713,7 +1792,7 @@
 /// - level (int, auto): a preset of the fine arguments -- 0 nothing, 1 the symbol and the answer, 2 also the formula in letters and the label, 3 also the formula in numbers, the description and the citation (`lib/display-presets.json`) --, which an argument written overrides.
 /// - norm-ref (str): written before `norm-section:`, which it is.
 /// -> content
-#let eq(..rest, name-calc: none, name-visible: none, equation: none, unit: auto, as-unit: none, value: auto, display-formula: auto, display-equation: auto, style: auto, stack: auto, role: auto, label: none, label-position: auto, label-width: auto, descr: none, descr-position: auto, norm: none, norm-section: none, norm-ref: "", norm-position: auto, id: none, level: auto) = {
+#let eq(..rest, name-calc: none, name-visible: none, equation: none, cases: none, unit: auto, as-unit: none, value: auto, display-formula: auto, display-equation: auto, style: auto, stack: auto, role: auto, label: none, label-position: auto, label-width: auto, descr: none, descr-position: auto, norm: none, norm-section: none, norm-ref: "", norm-position: auto, id: none, level: auto) = {
   // ⚠️ Declared one by one rather than swept into `..args`: a tooltip on a sink signature reads `eq(args: arguments) -> any` and says nothing about `unit:`, which is how this was found (v0.63.1). Only the positional tail stays variadic.
   let unknown = rest.named().keys()
   if unknown.len() > 0 {
@@ -1726,6 +1805,13 @@
   let tail = if name-calc != none { pos } else { pos.slice(1) }
   if name-visible != none { tail = (name-visible,) + tail }
   if equation != none { tail.push(equation) }
+  // a formula by cases (Q-012): no formula of its own; the first case's stands in for the checks below, the case that holds is chosen against the registry
+  let srcs = if cases == none { none } else {
+    if tail.filter(x => type(x) != str).len() > 0 or tail.len() > 1 { panic("eq: " + repr(key) + " is given cases: and a formula -- write one of the two") }
+    let checked = check-cases(cases)
+    tail.push(checked.first().formula)
+    checked
+  }
   check-key("eq", key)
   check-level("eq", level)
   check-line-id("eq", id)
@@ -1761,6 +1847,8 @@
 
   var-registry.update(d => {
     // An answer given with `value:` says the formula is there to be displayed, not evaluated: the words it carries -- `integral`, `dif`, a function's name -- are then expected rather than mistaken.
+    let case-i = if srcs == none { none } else { pick-case(d, srcs) }
+    let src = if srcs == none { src } else { srcs.at(case-i).formula }
     let got = evaluate-formula("eq", d, src, strict: given == auto)
     let shown = if got.result == none { none } else { present("eq", symbol, got.result, want, unit-table(d)) }
     let answer = if given != auto {
@@ -1783,7 +1871,7 @@
     count-line-id(take-next(var-store(d, key, (
       value: answer.value, unit: answer.unit, symbol: symbol,
       warning: answer.at("warning", default: none), as_unit_from: answer.at("as_unit_from", default: none),
-      label: label, description: descr, norm: norm, norm_ref: norm-ref, source: none,
+      label: label, description: descr, norm: norm, norm_ref: norm-ref, source: none, case: case-i,
       role: resolve-role("eq", role, d), shown: written + (if style != auto { (style: style) } else { (:) }),
     ))), id)
   })
@@ -1792,6 +1880,8 @@
     let d = var-registry.get()
     refuse-twice("eq", id, d)
     let r = var-lookup(d, key)
+    // the formula of the case that held, printed alone
+    let src = if srcs == none { src } else { srcs.at(r.at("case", default: 0)).formula }
     wc-meta((kind: "eq", domain: var-current(d), key: key, value: r.value, unit: r.unit, symbol: r.symbol, formula: src, level: level, id: id, role: r.at("role", default: "compute"), as_unit_from: r.at("as_unit_from", default: none)))
     // The result itself is in the registry by now; it is not one of its own operands.
     let operands = formula-operands(d, src).filter(o => o.key != key)

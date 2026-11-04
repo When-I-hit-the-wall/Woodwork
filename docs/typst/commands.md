@@ -52,6 +52,32 @@ Without anything written, a line prints its label in a column at the left, then 
 - `#verify(`a <= b`, label: …)` checks a relation and marks it ✓ or ✘ under a double rule. With `name-calc: "eta", name-visible: "eta"` it prints the ratio against 1, `η = σ/f = 6.429/12.8 = 0.502 ⩽ 1`, and stores `eta`.
 - Their arguments are Woodcore's: `label`, `label-position`, `label-width`, `descr`, `descr-position`, `norm`, `norm-section`, `norm-position`, `display`/`display-formula`/`display-equation`, `style`, `stack`, `role`, `id`, `level`.
 
+### A constant of a clause or a table: `from:` and `path:` (Q-011)
+
+```typ
+#var("beta_c",
+	from: "sia265/4.2.8-knicken",
+	path: "clause.beta_c.Brettschichtholz")
+#var("E_0_05",
+	from: "sia265/tab48-druckfestigkeit-e005-brettschichtholz",
+	path: "table_48.grades.GL24h.E_0_05")
+```
+
+`from:` names a file of `woodwork/data/` without `.json`; `path:` its keys joined by dots, an element of a list named by its `id`. The value is a number, or the `value` of the object the path ends on. Its unit is the one the table's `units` gives it, else the line's `unit:`, else none; its citation the norm and clause of the innermost object on the path that names one, unless the line writes its own. A path that leads nowhere stops the compile, listing what the file holds there. A norm value is never typed into a sheet: it is read so.
+
+### A formula by cases: `cases:` (Q-012)
+
+```typ
+#eq("k_m",
+	cases: (
+		(`lambda_rel_m <= 0.75`, `1`),
+		(`lambda_rel_m <= 1.4`, `1.56 - 0.75 * lambda_rel_m`),
+		(auto, `1 / lambda_rel_m^2`)),
+	norm-section: "4.2.9.2 (39)")
+```
+
+Each case is a pair: a condition -- a relation between two formulas, as `#verify` reads one -- and a formula. The first case whose condition holds is computed and printed, alone; the last case is `auto`, which always holds.
+
 ### Keys and symbols (D-15)
 
 A key prints as a symbol: the part before the first `_` is the letter, a Greek name being its letter (`sigma` σ); every part after it is an index, separated by commas — `N_t_d` N<sub>t,d</sub>, `sigma_t_0_d` σ<sub>t,0,d</sub>, `f_t_alpha_d` f<sub>t,α,d</sub>. An index that is a word is upright: `E_0_mean` E<sub>0,mean</sub>, `k_dens` k<sub>dens</sub>.

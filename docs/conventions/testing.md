@@ -27,6 +27,7 @@ Standard library only, no framework: a test is a function `test_*` in `tests/tes
 | `test_units.py` | `units:` on a domain, for values written and results; `unit:` on a line; two units of one dimension refused. |
 | `test_preset.py` | `preset:` equals the same settings written; the domain overrides its preset; a preset may set `units` and `norm`; an unknown preset is refused with the list. |
 | `test_data.py` | Every table of `woodwork/data/` has its `_source`, cites no Woodcore path, and holds the values of the Woodcore table it was copied from (`tools/import_norms.py`'s map). |
+| `test_from_and_cases.py` | `#var(…, from:, path:)` reads a value of `woodwork/data/` with its unit and citation, refuses a wrong path listing what is there; `#eq(…, cases:)` computes and prints the case that holds, refuses malformed cases. |
 | `test_material.py` | `#material` reads a class, applies η_w and η_t, publishes its values with their provenance, takes an engineer's value, suffixes with `as:`, refuses an unknown class. |
 | `test_generate.py` | `sheets/` is what `tools/generate.py` writes, byte for byte; a missing label key or language is named; the three trees have the same sheets; one named argument per line. |
 | `test_sheets.py` | Every generated sheet compiles; standard and detailed give the same utilisation; the values equal Woodcore's reference cases. |

@@ -303,6 +303,14 @@ Messages de l'ingénieur, mot pour mot (session du 04.11.2026). Les quatre captu
 - **Options** : A (recommandée) `"right"` dans Woodwork, `"line-right"` refusé avec un message qui donne le nouveau nom ; B garder `"line-right"` ; C accepter les deux.
 - **Réponse** : A, `"right"` (04.11.2026). → D-14.
 
+### Q-011 — Comment une feuille lit-elle une constante d'article ?
+- **Pourquoi elle compte** : 11 des 18 vérifications lisent des constantes (k_h, β_c, λ_rel limite, k_a, k_t,90) que la règle interdit de taper à la main.
+- **Réponse** : `#var(…, from:, path:)` (04.11.2026). → D-18.
+
+### Q-012 — Comment écrire une formule par morceaux ?
+- **Pourquoi elle compte** : k_m (39) ne s'écrit pas exactement avec `min` et `max`.
+- **Réponse** : `#eq(…, cases:)` (04.11.2026). → D-19.
+
 ## 11. Critères d'acceptation
 
 - [ ] REQ-001 — Woodwork compile hors de `305-typst-static-report/`, sans aucun chemin vers Woodcore.
@@ -498,3 +506,4 @@ _(à écrire par `verify-requirements`)_
 | 2026-11-04 | implementation | étape 6 : `woodwork/lib/material.typ`, `#material` (Tab. 8 et 9, η_w Tab. 4, η_t 2.2.6, `my-materials/materials.json` livré vide, valeur de l'ingénieur, cas de f_c,90,d, `print:`), règle de Woodcore `Strengths._grade` ; écart à la spec : `as:` est un mot réservé de Typst, l'argument s'appelle `suffix:` (à confirmer par l'ingénieur) ; une ligne sans libellé garde la colonne des libellés vide. Le refus de C16 en traction (Tab. 8 note 2) n'est pas encore porté. Tests : `test_material.py` (11) — 41 passés. REQ-009. Reste : étapes 7 à 9 |
 | 2026-11-04 | implementation | étape 7 : `tools/generate.py` (`sheets/` et `templates/` en fr/de/en depuis `source/`, `--check`, clés `{mot-mot}` à deux mots au moins, `// @insert` des lignes partagées depuis `source/parts/`, noms traduits par `paths`) ; première feuille `tension-parallel` standard et détaillée, termes lus dans SIA 265:2021 FR et DE p. 31 ; figure dans `woodwork/figures/` (copiée avec le moteur). Ajout T30 (templates de forme et de fond) : REQ-015 à REQ-017, D-17, étape 7b. Tests : `test_generate.py` (7) — 48 passés. REQ-003, REQ-004, ARCH-004, UI-002. Reste : 7b, 8, 9 |
 | 2026-11-04 | implementation | étape 7b : formes `woodwork/forms/{neutral,compact,bfh}.typ` tirées de Woodcore, une fonction par fichier (`#show: bfh`), `lang: none` par défaut (la langue du document), logo BFH ; pages de titre `titre-bfh`, `titre-neutre` (de : `titel-*`, en : `title-*`) en templates de fond générés, champs en tête de fichier, mots repris du `title.typ` de Woodcore ; les trois documents de Woodcore en squelettes (`tools/import_documents.py`, 519 fichiers, une source par langue `nom.<lang>.typ` que le générateur envoie à sa langue seule) : imports, balises et commentaires de Woodcore retirés, boucles sur l'export, `#sync`, valeurs de l'export, annexes et journal remplacés par un commentaire « À COMPLÉTER » ; `#show-norm-list` repris de `lib/document.typ`. Écarts : nom français « titre-neutre » (l'ingénieur a écrit « titre-neutral ») ; la page de titre ne choisit pas le document (champ `document` à remplir). Tests : `test_templates.py` (6). REQ-015 à REQ-017. Reste : 8, 9 |
+| 2026-11-04 | implementation | étape 8 commencée : il manquait au moteur la lecture d'une constante d'article et les formules par morceaux ; questions Q-011, Q-012 posées et répondues ; `#var(…, from:, path:)` (`data-value`, unité tirée des `units` de la table, citation de l'objet le plus proche qui a un `norm_ref`) et `#eq(…, cases:)` (`check-cases`, `pick-case`, la branche retenue imprimée seule) ; tests `test_from_and_cases.py` (6). Reste : les 17 feuilles, 9 |

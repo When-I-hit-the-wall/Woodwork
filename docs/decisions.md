@@ -41,5 +41,11 @@ With their titles, labels and notes; only `_note` lines citing Woodcore paths ar
 ## D-16 — A line cites its domain's norm only where it cites a clause
 A line that writes `norm-section:` and no `norm:` cites the domain's norm; a line without a clause cites nothing, so «SIA 265» is not repeated on every datum (the engineer's screenshots).
 
+## D-18 — A constant of a norm is read by `#var(…, from:, path:)`
+The engineer's choice (Q-011) over a command publishing a whole clause and over constants in `#material`: one line per value, which says where it comes from. Cost: a sheet's line is longer than a number typed by hand -- which the rule of principles.md (5) forbids anyway.
+
+## D-19 — A formula by cases is `#eq(…, cases:)`
+The engineer's choice (Q-012) over an `if` inside the formula and over Typst's own `#if`: the line prints the case that held, alone. k_m of SIA 265 (39) cannot be written exactly with `min` and `max`.
+
 ## Licence — GPL-3.0
 Woodwork's engine derives from Woodcore, which is GPL-3.0.
