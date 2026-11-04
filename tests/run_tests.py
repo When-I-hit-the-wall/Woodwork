@@ -53,6 +53,8 @@ def run_one(path, pattern, only, verbose):
 
 
 def main():
+    # a failure quotes a PDF's text, math letters included: never die on the console's code page
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     parser = argparse.ArgumentParser()
     parser.add_argument("-k", dest="pattern", default="")
     parser.add_argument("--failed", action="store_true")

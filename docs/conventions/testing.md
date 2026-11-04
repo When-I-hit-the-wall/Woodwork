@@ -23,10 +23,9 @@ Standard library only, no framework: a test is a function `test_*` in `tests/tes
 |---|---|
 | `test_tooling.py` | The skills and agents name no Woodcore path; `CLAUDE.md` and `docs/README.md` name only files that exist. |
 | `test_engine_standalone.py` | `woodwork/` compiles alone in an empty project; no `json(` or `read(` of `woodwork/lib` reaches outside `woodwork/`; every `t-str` key has fr, de and en; the engine's words follow `text.lang`. |
-| `test_domain_defaults.py` | What `#domain` is given holds for its lines, a line overrides it; `norm` is inherited; `"right"` is the citation's position and `"line-right"` is refused with the new name. |
-| `test_units.py` | `units:` on a domain; `unit:` on a line; two units of one dimension refused. |
-| `test_preset.py` | `preset:` equals the same settings written; an unknown preset is refused with the list. |
-| `test_eq_render.py` | The default rendering of a line: formula, numbers, result; no `level` needed. |
+| `test_domain_defaults.py` | What `#domain` is given holds for its lines, a line overrides it; `norm` is inherited where a line cites a clause; the default rendering (label left, formula, numbers, result) without `level`; keys of several indices; `"right"` and the refusal of `"line-right"`; no heading. |
+| `test_units.py` | `units:` on a domain, for values written and results; `unit:` on a line; two units of one dimension refused. |
+| `test_preset.py` | `preset:` equals the same settings written; the domain overrides its preset; a preset may set `units` and `norm`; an unknown preset is refused with the list. |
 | `test_data.py` | Every table of `woodwork/data/` has its `_source`, cites no Woodcore path, and holds the values of the Woodcore table it was copied from (`tools/import_norms.py`'s map). |
 | `test_material.py` | `#material` reads a class, applies η_w and η_t, publishes its values with their provenance, takes an engineer's value, suffixes with `as:`, refuses an unknown class. |
 | `test_generate.py` | `sheets/` is what `tools/generate.py` writes, byte for byte; a missing label key or language is named; the three trees have the same sheets; one named argument per line. |

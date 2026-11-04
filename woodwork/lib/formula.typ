@@ -1208,6 +1208,20 @@
   (value: value * a.factor / b.factor, unit: to, warning: none)
 }
 
+// A value written in a domain that names a unit for its dimension (`#domain(…, units: ("Nm",))`) is held and printed in that unit: `#var("M_d", 12.4, "kNm")` in it is 12 400 Nm (founding spec REQ-006, T23). Only the domains' units count, the innermost last -- the document's table chooses the unit of a computed result, never of a value written.
+#let to-domain-unit(d, r) = {
+  let u = r.at("unit", default: "")
+  if type(r.at("value", default: none)) not in (int, float) or type(u) != str or u == "" { return r }
+  let p = parse-unit(u)
+  if p == none or clean-dims(p.dims).len() == 0 { return r }
+  let k = dims-text(clean-dims(p.dims))
+  let want = none
+  for f in d.at("frames", default: ()) { if k in f.units { want = f.units.at(k) } }
+  if want == none or want == u { return r }
+  let c = converted("var", r.at("symbol", default: ""), r.value, u, want)
+  r + (value: c.value, unit: c.unit)
+}
+
 // The relative gap under which a value written beside `domain:` is taken as the one it names (docs/typst/formulas.md, «a literal checked by domain:», spec 2026-10-15). One constant for Typst; Python writes a value it unfolds with at least this precision (calc/domains/unfold.py LITERAL_TOLERANCE, held equal by tests/test_unfold.py).
 #let literal-tolerance = 1e-6
 
@@ -1556,12 +1570,12 @@
         count-line-id(take-next(var-store(d, key, with-role(d, record) + (checked_against: against))), id)
       })
     } else {
-      var-registry.update(d => count-line-id(take-next(var-store(d, key, with-role(d, record))), id))
+      var-registry.update(d => count-line-id(take-next(var-store(d, key, with-role(d, to-domain-unit(d, record)))), id))
     }
     context {
       let d = var-registry.get()
       refuse-twice("var", id, d)
-      let held = if not from-domain and not checked-domain { record } else {
+      let held = if not from-domain and not checked-domain { to-domain-unit(d, record) } else {
         let declared = d.domains.keys().filter(k => k != "")
         // A pair got here because the export has no such name, so its own list belongs in the refusal: the reader asked one question and both places have to answer it.
         let carried = if not pair { "" } else {
