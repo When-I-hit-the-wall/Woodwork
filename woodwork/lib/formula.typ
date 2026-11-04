@@ -1085,7 +1085,7 @@
 // `level: 0` and `display: "none"` are one thing since the fine arguments (REQ-007): nothing of the line is printed.
 #let shows-nothing(command, s) = if command == "eq" { s.at("display-formula") == "none" and s.at("display-equation") == "none" } else { s.at("display") == "none" }
 
-// An `id:` given to a line of `#var`, `#eq` or `#verify`: what Woodcore finds the line by, wherever it stands in its file (REQ-001, REQ-012). Once per domain, for the three commands together -- counted by an update and refused in a context, which always runs, where a refusal in the update would be silent.
+// An `id:` given to a line of `#var`, `#eq` or `#verify`: what `typst query` finds the line by. Once per domain, for the three commands together -- counted by an update and refused in a context, which always runs, where a refusal in the update would be silent.
 #let check-line-id(fn, id) = {
   if id != none and (type(id) != str or id.trim() == "") { panic(fn + ": id: is a non-empty string, got " + repr(id)) }
 }
@@ -1182,12 +1182,6 @@
     scope: (printed: body, dbl: double-rule))
 }
 
-// What one command says of itself to `typst query` (spec 2026-10-15, REQ-004): one label for all of them, `<woodcore-var>`, read by calc/domains/unfold.py (`query_state`) -- so that Woodcore learns what a domain holds from the compiler and never from parsing the file. Emitted from the command's context, where its value is known, outside every row item; invisible, at every level, level 0 included. A value that is not JSON (`auto`) is written as its repr.
-#let wc-meta(fields) = {
-  let plain(v) = if v == auto { "auto" } else if type(v) == dictionary { v.pairs().map(((k, x)) => (k, plain(x))).to-dict() } else if type(v) == array { v.map(plain) } else if type(v) in (str, int, float, bool) or v == none { v } else { repr(v) }
-  // no space before the label: in markup it would be printed, a space before every separator of a row (found by tests/test_formula.py on the first build)
-  [#metadata(plain(fields))<woodcore-var>]
-}
 
 #let var-argument-names = ("name-calc", "name-visible", "value", "unit", "from", "path", "domain", "display", "style", "role", "label", "label-position", "label-width", "descr", "descr-position", "norm", "norm-section", "norm-position", "id", "level")
 
@@ -1540,7 +1534,6 @@
       let inherited = r.at("shown", default: (:))
       let fine = inherited + written
       let st = if "style" in fine { fine.style } else { auto }
-      wc-meta((kind: "var", domain: var-current(d), key: key, value: held.value, unit: held.unit, symbol: held.symbol, from: none, stale: none, level: level, id: id, role: r.at("role", default: "data"), again: true))
       var-line-print("var", held, fine.pairs().filter(((k, _)) => k != "style").to-dict(), level, d, resolve-style(st, d), none)
     }
   } else {
@@ -1640,7 +1633,6 @@
         let against = held.at("checked_against", default: none)
         if against == none { none } else { literal-stale(held, against) }
       } else { stale-now }
-      wc-meta((kind: "var", domain: var-current(d), key: key, value: held.value, unit: held.unit, symbol: held.symbol, from: domain, stale: stale, level: level, id: id, role: (var-lookup(d, key) + (:)).at("role", default: "data")))
       var-line-print("var", held, written, level, d, resolve-style(style, d), stale)
     }
 
@@ -1878,7 +1870,6 @@
     let r = var-lookup(d, key)
     // the formula of the case that held, printed alone
     let src = if srcs == none { src } else { srcs.at(r.at("case", default: 0)).formula }
-    wc-meta((kind: "eq", domain: var-current(d), key: key, value: r.value, unit: r.unit, symbol: r.symbol, formula: src, level: level, id: id, role: r.at("role", default: "compute"), as_unit_from: r.at("as_unit_from", default: none)))
     // The result itself is in the registry by now; it is not one of its own operands.
     let operands = formula-operands(d, src).filter(o => o.key != key)
     let (letters, numbers) = formula-lines(src, operands)
@@ -2317,7 +2308,6 @@
   let holds = (test-relations.at(key).holds)(l.base, r.base)
   let shown-op = if holds { key } else { relation-negation.at(key) }
   // what the relation says of itself to `typst query` (REQ-004), joined to whatever the lines below print -- which is why they are a closure: a `return` of theirs would otherwise drop it
-  let meta = wc-meta((kind: "verify", domain: var-current(d), id: id, relation: src, holds: holds, left: (value: l.value, unit: l.unit), right: (value: r.value, unit: r.unit), level: level))
   let render() = {
   // the level's scale -- 1 the symbols, 2 the values, 3 all of it -- is what `display` names since the fine arguments: `"variable"`, `"value-unit"`, `"variable-value-unit"`
   let rd = if written == none { none } else { resolve-display("verify", written, level, d) }
@@ -2386,7 +2376,7 @@
     mark(lift: below + outer + inner)
   })))
   }
-  meta + render()
+  render()
 }
 
 // References of the block below (moved out of it, issue #115): spec 2026-10-21-commandes-typst-refonte, REQ-004, D-12.

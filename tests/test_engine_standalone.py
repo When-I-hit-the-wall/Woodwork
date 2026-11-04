@@ -42,7 +42,7 @@ def test_the_engine_reads_nothing_outside_woodwork():
 
 def test_nothing_of_a_woodcore_project_is_left():
     gone = ("find-calculation", "load-domain-state", "domain-heading", "uniform-level", "show-masked", "sync-depth",
-            "load-position", "load-calculations", "load-journal", "project-info", "woodcore-document", "load-connections")
+            "load-position", "load-calculations", "load-journal", "project-info", "woodcore-document", "load-connections", "wc-meta", "woodcore-var")
     text = "\n".join(f.read_text(encoding="utf-8") for f in (ENGINE / "lib").glob("*.typ"))
     left = [name for name in gone if re.search(r"(?<![\w-])%s(?![\w-])" % re.escape(name), text)]
     assert not left, left

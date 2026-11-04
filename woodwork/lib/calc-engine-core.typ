@@ -1,7 +1,7 @@
 // lib/calc-engine-core.typ -- the report's level, the numbers, the data and its access (`ids`, `get`, `find`), the formula laid out on its rows, the position and connector summary lines.
 // Split out of lib/calc-engine.typ by subject, its text moved and not rewritten (spec docs/requirements/active/2026-10-19-base-saine-nettoyage.md, G9). Each part imports the one before it, so a name reads everything defined above it as it did in one file; lib/calc-engine.typ imports the last and is what every caller names.
 
-// Display layer for the calc/ -> data/ pipeline (docs/typst/report-engine.md §4-10). Typst never computes anything here -- it only reads and formats what calc/export_all.py already validated and wrote to data/.
+// The registry, the levels, the numbers and their display: the core of the engine Woodwork took from Woodcore.
 
 // Every word this file prints comes out of one glossary, in the report's language (docs/typst/language.md §4bis). `t-str` is the engine's own word by a key, `tl-str` a string the data carries -- translated if the glossary knows it, left alone if not, which is what keeps a material's name and an Excel description in the engineer's own words. Imported here rather than in each section, so commands.typ re-exports it with the rest.
 #import "i18n.typ": *
@@ -77,7 +77,7 @@
 /// -> bool
 #let at-level(arg, lv, from) = if arg == auto { lv >= from } else { arg }
 
-// The figures' colours and font, lib/figure-palette.json -- the drawing engines of calc/domains/ read the same file (svg_draw.colour), so a figure the report draws itself (a scale bar, a halo, a connection's arrows) is in the very colours of one Python drew (spec 2026-10-19-base-saine-nettoyage, D5). A colour is named by its token, as `figure-colour("ink")`, a `#rrggbb` string an SVG takes as it is and `rgb()` reads.
+// The figures' colours and font, woodwork/lib/figure-palette.json.
 #let figure-palette = json("figure-palette.json")
 #let figure-colour(token) = figure-palette.colours.at(token)
 

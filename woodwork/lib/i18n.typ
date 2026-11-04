@@ -1,26 +1,8 @@
 // The report's language, and every word the engine prints in it (docs/typst/language.md §4bis).
 //
-// One glossary, `calc/i18n/strings.json`, read here and by `calc/i18n/strings.py` -- so a word both
-// sides say, such as the note under a connection's figure that Python sizes and Typst fills in, is
-// written once. What is *not* in it is the engineer's own data: descriptions and text values,
-// case names, positions, material names, the prose of Sections/*.typ. That is the whole rule
-// `tl` applies -- a string is translated if the glossary carries it, and passes through if not.
-//
-// Two ways in, because Typst's state can only be read inside `context`:
-//
-//   `t-of(lang, key)` / `tl-of(lang, text)`   plain strings, for a caller that has already resolved
-//                                             the language -- every show-* function, which is inside
-//                                             a context block anyway, and every string written into
-//                                             an SVG or into math source.
-//   `t(key)` / `tl(text)`                     content, wrapped in `context`, for markup:
-//                                             `#t("governing")`, `#tl(get(v, "label"))`.
-//
-// ⚠️ A section file calls neither (docs/typst/language.md §4bis, v0.54). Its headings, and the document's
-// title, are the engineer's own words, written by hand in the language the report is written in, and
-// nothing translates them -- which is why the glossary carries no `section.*` key any more.
+// One glossary, woodwork/lib/strings.json: the words the engine prints itself, by key, in fr, de and en (taken from Woodcore's glossary, cut to the keys this engine calls).
 
-// The glossary itself, the same file calc/i18n/strings.py reads. Relative to this file, like the
-// data/ paths beside it, so it does not depend on where --root points.
+// The glossary, read relative to this file, so it does not depend on where --root points.
 #let glossary = json("strings.json")
 
 // The languages a report can be written in. The first is the source language: the German the export
@@ -90,7 +72,7 @@
   } else if key in glossary.templates {
     fill-template(glossary.templates.at(key).at(lang), named)
   } else {
-    panic("t-of: no string \"" + key + "\" in the glossary -- see calc/i18n/strings.json")
+    panic("t-of: no string \"" + key + "\" in the glossary -- see woodwork/lib/strings.json")
   }
 }
 

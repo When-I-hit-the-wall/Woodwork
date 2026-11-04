@@ -6,7 +6,7 @@
 //
 // Where the entries come from, in this order:
 //
-//   * **`calc/norms/norms.json`**, the documents the engine knows -- read through the relative path `../calc/norms/`, the way `lib/distance.typ` reads its tables, so it resolves in the program and in a project's `_woodcore/` alike. `calc/norms/norms.py` checks the same file before an export reads anything, and `tests/test_bibliography.py` holds the two lists equal;
+//   * **`woodwork/data/norms.json`**, the documents the engine knows, read relative to this file.
 //   * **the project's own `references.bib`**, named by `project:`, at the Typst root -- the project's top folder, shared by the project's documents (in a project laid out before there were three documents, the report's folder, which was the root) -- a manufacturer's ETA, an office handbook, a course document. It wins over the engine's catalogue for a key both carry, a project knowing its own editions best;
 //   * **nothing**, for a citation neither names: it is printed as it was cited, in a third block of its own. A citation without an entry is never lost and never invented.
 //
@@ -40,15 +40,15 @@
 
 // --- The engine's own catalogue ---------------------------------------------
 
-// Where the catalogue is, seen from this file -- calc/norms/, beside lib/ in the program and in a project's _woodcore/ alike.
+// Where the catalogue is, seen from this file: woodwork/data/.
 #let bib-dir = "../data/"
 #let bib-file = "norms.json"
 
-// The two blocks an entry may claim, and the third the report gives a citation no entry names. calc/norms/norms.py's KINDS is the first two.
+// The two blocks an entry may claim, and the third the report gives a citation no entry names.
 #let bib-kinds = ("norm", "literature")
 #let bib-blocks = ("norm", "literature", "other")
 
-// The entries the engine knows: calc/norms/norms.json, as calc/norms/norms.py checks it. Nothing is validated again here -- a defective file stops an export long before a report is compiled.
+// The entries the engine knows: woodwork/data/norms.json (tests/test_data.py holds it).
 #let bib-catalogue() = json(bib-dir + bib-file).references
 
 // --- The project's own references.bib ---------------------------------------
@@ -320,7 +320,7 @@
 /// #show-bibliography()
 /// ```
 ///
-/// Where the entries come from: `calc/norms/norms.json`, the documents the engine knows, and the project's own `references.bib` where `project:` names one, which wins for a key both carry. A document neither names is printed as it was cited.
+/// Where the entries come from: `woodwork/data/norms.json`, the documents the engine knows, and the project's own `references.bib` where `project:` names one, which wins for a key both carry. A document neither names is printed as it was cited.
 /// - project (str, none): the project's own `references.bib`, as a path from the Typst root -- the project's top folder, where the project's documents share one -- `"references.bib"`. `none` reads none, which is why a project without one compiles.
 /// - blocks (array, auto): which blocks to print, in order: `"norm"`, `"literature"`, `"other"`. `auto` prints the three.
 /// - heading (int, none): `none` names each block in bold on a line of its own, which keeps the outline the engineer's (section 4bis); an integer sets the names as headings of that level.

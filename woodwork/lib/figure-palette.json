@@ -1,5 +1,5 @@
 {
-  "about": "The colours and the font every figure of Woodcore is drawn with -- the position plans, the fire plans, the schemas, the static models, the connections, the connectors, the dead loads and the snow -- written once for the drawing engines of calc/domains/ (svg_draw.colour) and for the report's own drawings (lib/calc-engine-drawings.typ reads this file with json(\"figure-palette.json\")), spec 2026-10-19-base-saine-nettoyage D5. Until v0.120 each engine wrote its own: some sixty values, five blacks among them (#000000, #111111, #1f1f1f, #222222, #2b2b2b); they were merged here into one per role (Q-015), the plan's STE colours kept where a hue had several. A colour is named by its hue or its role, never by the engine that draws it. `lists` holds the rotations a figure takes one after the other, each colour distinct on purpose. The window's own colours are not here: they are calc/tools/theme.json's.",
+  "about": "The colours and the font of the figures, taken from Woodcore on 4 November 2026: one value per role, a colour named by its hue or its role. `lists` holds the rotations a figure takes one after the other.",
   "font-family": "Arial",
   "colours": {
     "ground": "#ffffff",

@@ -120,3 +120,15 @@ def test_the_utilisations_are_woodcores():
         theirs = mc.compute(record)["eta"]
         mine = max(utilisations(english[name], "en").values())
         assert abs(mine - theirs) <= 1e-9 * max(1, theirs), (name, mine, theirs)
+
+
+def test_a_sheet_says_the_same_in_its_three_languages():
+    # REQ-003: the same source gives the same utilisations in fr, de and en
+    sys.path.insert(0, str(ROOT / "tools"))
+    import generate
+    _, paths = generate.load_labels()
+    src = ROOT / "source" / "sheets"
+    for f in sorted(src.rglob("*.typ")):
+        rel = f.relative_to(src)
+        got = {lang: all_utilisations(lang)[generate.target_of(rel, lang, paths).as_posix()] for lang in LANGS}
+        assert got["fr"] == got["de"] == got["en"], (rel.as_posix(), got)

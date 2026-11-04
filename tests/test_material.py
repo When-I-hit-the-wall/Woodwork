@@ -91,3 +91,10 @@ def test_it_prints_nothing_unless_asked():
     assert ok, err
     t = pdf_text(pdf)
     assert "Classe d’humidité 2" in t and "SIA 265 Tab. 4" in t and "SIA 265 Tab. 9" in t and "10.24 N/mm²" in t, t
+
+
+def test_an_engineers_value_is_printed_as_his():
+    ok, _, err, pdf = compile_typ(HEAD + '#domain("t", norm: "SIA 265")[#material("GL24h", f_t_0_d: 11.0, print: ("f_t_0_d",))]\n', lang="fr")
+    assert ok, err
+    t = pdf_text(pdf)
+    assert "valeur de l’ingénieur" in t and "11 N/mm²" in t, t

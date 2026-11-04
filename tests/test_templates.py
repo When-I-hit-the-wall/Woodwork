@@ -71,3 +71,23 @@ def test_no_skeleton_reads_a_woodcore_project():
         text = p.read_text(encoding="utf-8")
         for gone in ("ids(", "domain-file", "#sync(", "woodcore:", "project-info", "title-page(", "set-report-language", "/commands.typ"):
             assert gone not in text, (p.relative_to(ROOT).as_posix(), gone)
+
+
+def test_a_title_page_has_neither_header_nor_footer():
+    # REQ-016: the form bfh's footer stands on the pages after the title page, not on it
+    files = generated("fr")
+    ok, _, err, pdf = compile_typ('#import "/woodwork/forms/bfh.typ": bfh\n#show: bfh\n#include "t.typ"\n= Chapitre\nTexte.\n', files={"t.typ": files["titre-bfh.typ"]}, lang="fr")
+    assert ok, err
+    from pypdf import PdfReader
+    pages = [p.extract_text() for p in PdfReader(str(pdf)).pages]
+    assert "Haute école spécialisée bernoise" not in pages[0], pages[0]
+    assert "Haute école spécialisée bernoise" in pages[-1], pages[-1]
+
+
+def test_the_bfh_form_sets_its_sans_font():
+    # REQ-015: Lucida Sans, Segoe UI then Arial where it is not installed
+    ok, _, err, pdf = compile_typ('#import "/woodwork/forms/bfh.typ": bfh\n#show: bfh\nTexte.\n', lang="fr")
+    assert ok, err
+    from pypdf import PdfReader
+    names = " ".join(str(f.get_object()["/BaseFont"]) for f in PdfReader(str(pdf)).pages[0]["/Resources"]["/Font"].get_object().values())
+    assert any(n in names for n in ("Lucida", "Segoe", "Arial")), names
