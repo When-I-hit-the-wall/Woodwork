@@ -1,0 +1,304 @@
+{
+  "schema_version": "1.3",
+  "_comment": "What each level of detail sets of the fine display arguments of #var, #eq, #verify and #domain (spec docs/requirements/completed/2026-10-21-commandes-typst-refonte.md, REQ-007, ARCH-001). A level is a preset and nothing more: an argument the call writes wins over it, and lib/formula.typ's resolve-display reads the layers in the engineer's order -- the call's argument, the call's level, #calc-defaults of the domain, the domain's level, #calc-defaults of the document, the document's level; --input uniform=N alone overrides the arguments written (Q-005). Each level reproduces what the command printed at that level before the fine arguments existed, so a call written before them prints as it did. Read by Typst alone; tests/test_fine_display.py holds it complete and equal to the table of docs/typst/formulas.md. Since 1.1 a second family, `block` (spec Q-014, 21.10.2026): the same visibility at each level, the label after the line and the citation in the right-hand column, the line set apart -- what `note: \"line\"` printed, chosen for a domain by `#calc-defaults(presets: \"block\", scope: \"domain\")`, which a generated file writes once at its head; `commands` is the default family, `inline`. Since 1.2 (spec 2026-10-22-onglet-neige-type, D-17, ARCH-RISK-F03): `fine-values`, the values each fine argument takes, and `fine-keys`, the fine arguments each command takes -- until then two dictionaries of lib/formula.typ, now read from here by Typst (lib/formula.typ) and by Python (calc/line_display.py: the arguments a line's display is set by, which the engineer's file keeps through an export), so that the two cannot name them two ways. Since 1.3 (spec 2026-10-28-etiquette-a-gauche-issues-117-118, D-2, ARCH-RISK-001): `label-position: \"left\"`, the label in a column of its own left of the line, and `fine-lengths`, the fine arguments that take a length rather than a word -- `label-width`, that column's width --, with their one default: no level presets them, so they are not written in the presets.",
+  "commands": {
+    "var": {
+      "0": {
+        "display": "none",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "1": {
+        "display": "variable-value-unit",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "2": {
+        "display": "variable-value-unit",
+        "label-position": "footnote",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "3": {
+        "display": "variable-value-unit",
+        "label-position": "footnote",
+        "descr-position": "footnote",
+        "norm-position": "footnote"
+      }
+    },
+    "eq": {
+      "0": {
+        "display-formula": "none",
+        "display-equation": "none",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "1": {
+        "display-formula": "none",
+        "display-equation": "variable-value-unit",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "2": {
+        "display-formula": "variable",
+        "display-equation": "variable-value-unit",
+        "label-position": "footnote",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "3": {
+        "display-formula": "variable-value-unit",
+        "display-equation": "variable-value-unit",
+        "label-position": "footnote",
+        "descr-position": "footnote",
+        "norm-position": "footnote"
+      }
+    },
+    "verify": {
+      "0": {
+        "display": "none",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "1": {
+        "display": "variable",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "2": {
+        "display": "value-unit",
+        "label-position": "footnote",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "3": {
+        "display": "variable-value-unit",
+        "label-position": "footnote",
+        "descr-position": "footnote",
+        "norm-position": "footnote"
+      }
+    },
+    "domain": {
+      "0": {
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "1": {
+        "label-position": "before",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "2": {
+        "label-position": "before",
+        "descr-position": "after",
+        "norm-position": "none"
+      },
+      "3": {
+        "label-position": "before",
+        "descr-position": "after",
+        "norm-position": "right"
+      }
+    }
+  },
+  "block": {
+    "var": {
+      "0": {
+        "display": "none",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "1": {
+        "display": "variable-value-unit",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "2": {
+        "display": "variable-value-unit",
+        "label-position": "after",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "3": {
+        "display": "variable-value-unit",
+        "label-position": "after",
+        "descr-position": "footnote",
+        "norm-position": "right"
+      }
+    },
+    "eq": {
+      "0": {
+        "display-formula": "none",
+        "display-equation": "none",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "1": {
+        "display-formula": "none",
+        "display-equation": "variable-value-unit",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "2": {
+        "display-formula": "variable",
+        "display-equation": "variable-value-unit",
+        "label-position": "after",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "3": {
+        "display-formula": "variable-value-unit",
+        "display-equation": "variable-value-unit",
+        "label-position": "after",
+        "descr-position": "footnote",
+        "norm-position": "right"
+      }
+    },
+    "verify": {
+      "0": {
+        "display": "none",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "1": {
+        "display": "variable",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "2": {
+        "display": "value-unit",
+        "label-position": "after",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "3": {
+        "display": "variable-value-unit",
+        "label-position": "after",
+        "descr-position": "footnote",
+        "norm-position": "right"
+      }
+    },
+    "domain": {
+      "0": {
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "1": {
+        "label-position": "before",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "2": {
+        "label-position": "before",
+        "descr-position": "after",
+        "norm-position": "none"
+      },
+      "3": {
+        "label-position": "before",
+        "descr-position": "after",
+        "norm-position": "right"
+      }
+    }
+  },
+  "fine-values": {
+    "display": [
+      "none",
+      "variable",
+      "value",
+      "value-unit",
+      "variable-value-unit"
+    ],
+    "display-formula": [
+      "none",
+      "variable",
+      "value",
+      "value-unit",
+      "variable-value-unit"
+    ],
+    "display-equation": [
+      "none",
+      "variable",
+      "value",
+      "value-unit",
+      "variable-value-unit"
+    ],
+    "label-position": [
+      "none",
+      "before",
+      "after",
+      "footnote",
+      "left"
+    ],
+    "descr-position": [
+      "none",
+      "after",
+      "footnote"
+    ],
+    "norm-position": [
+      "none",
+      "in-line",
+      "right",
+      "footnote"
+    ],
+    "style": [
+      "normal",
+      "bold",
+      "underline",
+      "double"
+    ],
+    "role": [
+      "data",
+      "compute",
+      "result"
+    ]
+  },
+  "fine-lengths": {
+    "label-width": {
+      "default": "35%",
+      "commands": [
+        "var",
+        "eq",
+        "verify"
+      ]
+    }
+  },
+  "fine-keys": {
+    "var": [
+      "display",
+      "label-position",
+      "descr-position",
+      "norm-position"
+    ],
+    "eq": [
+      "display-formula",
+      "display-equation",
+      "label-position",
+      "descr-position",
+      "norm-position"
+    ],
+    "verify": [
+      "display",
+      "label-position",
+      "descr-position",
+      "norm-position"
+    ],
+    "domain": [
+      "label-position",
+      "descr-position",
+      "norm-position"
+    ]
+  }
+}

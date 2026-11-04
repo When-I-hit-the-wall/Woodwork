@@ -1,0 +1,93 @@
+{
+  "_note": "The words Woodwork's engine prints itself, by key, in the three languages; taken from Woodcore's calc/i18n/strings.json on 4 November 2026 and cut to the keys woodwork/lib/ calls (tests/test_engine_standalone.py holds them so). The words of a sheet are not here: they are written in the sheet, in its own language (source/labels.json).",
+  "languages": [
+    "de",
+    "fr",
+    "en"
+  ],
+  "engine": {
+    "table.width_over": {
+      "de": "Die verlangten Spaltenbreiten übersteigen die Seitenbreite und wurden verkleinert.",
+      "fr": "Les largeurs de colonnes demandées dépassent la largeur de la page : elles ont été réduites.",
+      "en": "The requested column widths exceed the page width and were reduced."
+    },
+    "governing": {
+      "de": "Massgebend",
+      "fr": "Déterminant",
+      "en": "Governing"
+    },
+    "bibliography.norm": {
+      "de": "Normen",
+      "fr": "Normes",
+      "en": "Standards"
+    },
+    "bibliography.literature": {
+      "de": "Literatur",
+      "fr": "Littérature",
+      "en": "Literature"
+    },
+    "bibliography.other": {
+      "de": "Weitere Dokumente",
+      "fr": "Autres documents",
+      "en": "Other documents"
+    },
+    "var_table.descr": {
+      "de": "Beschreibung",
+      "fr": "Description",
+      "en": "Description"
+    },
+    "var_table.label": {
+      "de": "Bezeichnung",
+      "fr": "Désignation",
+      "en": "Designation"
+    },
+    "var_table.symbol": {
+      "de": "Symbol",
+      "fr": "Symbole",
+      "en": "Symbol"
+    },
+    "var_table.value": {
+      "de": "Wert",
+      "fr": "Valeur",
+      "en": "Value"
+    },
+    "var_table.unit": {
+      "de": "Einheit",
+      "fr": "Unité",
+      "en": "Unit"
+    },
+    "var_table.norm": {
+      "de": "Norm",
+      "fr": "Norme",
+      "en": "Norm"
+    },
+    "var_table.norm-section": {
+      "de": "Ziffer",
+      "fr": "Article",
+      "en": "Clause"
+    },
+    "var_table.empty": {
+      "de": "Keine Variable dieser Rolle.",
+      "fr": "Aucune variable de ce rôle.",
+      "en": "No variable of this role."
+    }
+  },
+  "templates": {
+    "script.line": {
+      "de": "Skript {file}, Z. {line}",
+      "fr": "script {file}, l. {line}",
+      "en": "script {file}, l. {line}"
+    },
+    "formula.unit_mismatch": {
+      "de": "Die verlangte Einheit {wanted} passt nicht zu den Einheiten der Operanden — das Ergebnis steht in {natural}.",
+      "fr": "L’unité demandée {wanted} ne correspond pas aux unités des opérandes — le résultat est donné en {natural}.",
+      "en": "The requested unit {wanted} does not match the operands’ units — the result is given in {natural}."
+    },
+    "formula.stale": {
+      "de": "veraltet: {value} im Export",
+      "fr": "périmé : {value} dans l’export",
+      "en": "stale: {value} in the export"
+    }
+  },
+  "terms": {}
+}

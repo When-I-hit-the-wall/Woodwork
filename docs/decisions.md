@@ -35,5 +35,11 @@ Label left, formula then numbers then result, citation right (the `block` family
 ## D-13 — Norm tables published as Woodcore had them
 With their titles, labels and notes; only `_note` lines citing Woodcore paths are cleaned. Cost accepted: labels of SIA tables are public.
 
+## D-15 — A key of several indices prints them separated by commas
+`N_t_d` prints N<sub>t,d</sub>, `sigma_t_0_d` σ<sub>t,0,d</sub>, `E_0_mean` E<sub>0,mean</sub>: each part after the first `_` is an index, kept when it is one character, a number or a Greek name, upright when it is a word. Woodcore printed `t_d` as one quoted subscript; a sheet could then only reach the notation of the norm by writing every symbol by hand, which the engineer's syntax (founding spec T15) does not. A key of one index is printed as before (`k_dens`, `gamma_M`).
+
+## D-16 — A line cites its domain's norm only where it cites a clause
+A line that writes `norm-section:` and no `norm:` cites the domain's norm; a line without a clause cites nothing, so «SIA 265» is not repeated on every datum (the engineer's screenshots).
+
 ## Licence — GPL-3.0
 Woodwork's engine derives from Woodcore, which is GPL-3.0.

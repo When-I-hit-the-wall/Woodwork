@@ -1,0 +1,12 @@
+{
+  "_note": "Named sets of the defaults a #domain hands to its lines (docs/typst/commands.md). A domain names one with preset: \"report\"; what the domain writes overrides it. An office may add its own.",
+  "presets": {
+    "report": {
+      "label-position": "left",
+      "norm-position": "right",
+      "display": "variable-value-unit",
+      "display-formula": "variable-value-unit",
+      "display-equation": "variable-value-unit"
+    }
+  }
+}
