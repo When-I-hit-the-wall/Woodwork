@@ -448,16 +448,18 @@
     let got = parse-atom(i)
     if got == none { return none }
     let (value, j) = got
-    // one line: a line break inside a Typst `if` condition ends the expression
-    if (j + 1 < tokens.len() and tokens.at(j).kind == "op" and tokens.at(j).op == "^" and tokens.at(j + 1).kind == "qty" and clean-dims(tokens.at(j + 1).value.dims).len() == 0) {
-      let n = tokens.at(j + 1).value.base
+    // the exponent: a number, or any atom without a dimension -- a variable, a bracket -- since Woodwork reads a norm's exponent from its table (SIA 265 (5), k_h = (600 mm / h)^0.1, the 0.1 read from woodwork/data/)
+    let exponent = if j + 1 < tokens.len() and tokens.at(j).kind == "op" and tokens.at(j).op == "^" { parse-atom(j + 1) } else { none }
+    if exponent != none and clean-dims(exponent.at(0).dims).len() == 0 {
+      let n = exponent.at(0).base
+      let after = exponent.at(1)
       // ⚠️ A power that leaves a dimension fractional has no unit to give -- `d^2.6` of a d in mm is mm^2.6 -- and until v0.86 it crashed deep in the display with «dictionary does not contain key "."», on the one formula a timber engineer writes most: SIA 265 (87), M_u,k = 0.3 · f_u,k · d^2.6, which holds for d in mm and gives Nmm **by convention**. Refused here, saying what to write instead.
       if clean-dims(value.dims).values().any(e => calc.fract(e * n) != 0) {
         panic("eq: " + dims-text(value.dims) + " raised to " + str(n) + " has no unit -- a formula that holds only "
           + "in given units (SIA 265 (87): d in mm) is written with its answer and its unit, value: and unit:, "
           + "or with its operands as plain numbers")
       }
-      return (q-pow(value, n), j + 2)
+      return (q-pow(value, n), after)
     }
     (value, j)
   }

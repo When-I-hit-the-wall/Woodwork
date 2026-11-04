@@ -45,7 +45,9 @@ def test_one_named_argument_a_line():
                 named = re.findall(r"(?<![\w-])[a-z][\w-]*:\s", line.split("`")[0] if "`" in line else line)
                 assert len(named) == 0, "%s:%d holds a named argument on the command's line: %s" % (p.relative_to(ROOT), n, line)
             elif line.startswith("\t"):
-                assert len(re.findall(r"(?<![\w-])[a-z][\w-]*: ", line)) <= 1, "%s:%d: %s" % (p.relative_to(ROOT), n, line)
+                # text in content brackets or quotes is prose («…: bending with compression»), not an argument
+                code = re.sub(r'\[[^\]]*\]|"[^"]*"|`[^`]*`', "", line)
+                assert len(re.findall(r"(?<![\w-])[a-z][\w-]*: ", code)) <= 1, "%s:%d: %s" % (p.relative_to(ROOT), n, line)
 
 
 def test_a_missing_label_is_named_with_its_file():

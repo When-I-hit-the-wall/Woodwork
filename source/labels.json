@@ -175,6 +175,536 @@
       "fr": "(if d.day() == 1 { \"1er\" } else { str(d.day()) }) + \" \" + months.at(d.month() - 1) + \" \" + str(d.year())",
       "de": "str(d.day()) + \". \" + months.at(d.month() - 1) + \" \" + str(d.year())",
       "en": "str(d.day()) + \" \" + months.at(d.month() - 1) + \" \" + str(d.year())"
+    },
+    "compression-force": {
+      "fr": "Effort de compression",
+      "de": "Druckkraft",
+      "en": "Compressive force"
+    },
+    "compressive-stress": {
+      "fr": "Contrainte de compression",
+      "de": "Druckspannung",
+      "en": "Compressive stress"
+    },
+    "compressive-strength": {
+      "fr": "Résistance à la compression",
+      "de": "Druckfestigkeit",
+      "en": "Compressive strength"
+    },
+    "compression-check": {
+      "fr": "Vérification compression",
+      "de": "Nachweis Druck",
+      "en": "Compression check"
+    },
+    "angle-to-grain": {
+      "fr": "Angle par rapport au fil",
+      "de": "Winkel zur Faserrichtung",
+      "en": "Angle to the grain"
+    },
+    "tensile-strength-angle": {
+      "fr": "Résistance à la traction biaise",
+      "de": "Zugfestigkeit unter dem Winkel",
+      "en": "Tensile strength at the angle"
+    },
+    "compressive-strength-angle": {
+      "fr": "Résistance à la compression biaise",
+      "de": "Druckfestigkeit unter dem Winkel",
+      "en": "Compressive strength at the angle"
+    },
+    "tensile-strength-perp": {
+      "fr": "Résistance à la traction perpendiculaire",
+      "de": "Zugfestigkeit rechtwinklig",
+      "en": "Tensile strength perpendicular"
+    },
+    "compressive-strength-perp": {
+      "fr": "Résistance à la compression perpendiculaire",
+      "de": "Druckfestigkeit rechtwinklig",
+      "en": "Compressive strength perpendicular"
+    },
+    "bearing-length": {
+      "fr": "Longueur d'appui",
+      "de": "Auflagerlänge",
+      "en": "Bearing length"
+    },
+    "bearing-width": {
+      "fr": "Largeur d'appui",
+      "de": "Auflagerbreite",
+      "en": "Bearing width"
+    },
+    "bearing-area": {
+      "fr": "Surface d'appui",
+      "de": "Auflagerfläche",
+      "en": "Bearing area"
+    },
+    "bearing-force": {
+      "fr": "Force d'appui",
+      "de": "Auflagerkraft",
+      "en": "Bearing force"
+    },
+    "bending-moment-y": {
+      "fr": "Moment de flexion (axe y)",
+      "de": "Biegemoment (Achse y)",
+      "en": "Bending moment (axis y)"
+    },
+    "bending-moment-z": {
+      "fr": "Moment de flexion (axe z)",
+      "de": "Biegemoment (Achse z)",
+      "en": "Bending moment (axis z)"
+    },
+    "section-modulus-y": {
+      "fr": "Module de flexion (axe y)",
+      "de": "Widerstandsmoment (Achse y)",
+      "en": "Section modulus (axis y)"
+    },
+    "section-modulus-z": {
+      "fr": "Module de flexion (axe z)",
+      "de": "Widerstandsmoment (Achse z)",
+      "en": "Section modulus (axis z)"
+    },
+    "reference-height": {
+      "fr": "Hauteur de référence",
+      "de": "Bezugshöhe",
+      "en": "Reference height"
+    },
+    "height-factor-exponent": {
+      "fr": "Exposant",
+      "de": "Exponent",
+      "en": "Exponent"
+    },
+    "height-factor-maximum": {
+      "fr": "Valeur maximale",
+      "de": "Höchstwert",
+      "en": "Maximum"
+    },
+    "height-factor": {
+      "fr": "Coefficient de hauteur",
+      "de": "Höhenbeiwert",
+      "en": "Size factor"
+    },
+    "bending-strength": {
+      "fr": "Résistance à la flexion",
+      "de": "Biegefestigkeit",
+      "en": "Bending strength"
+    },
+    "bending-stress": {
+      "fr": "Contrainte de flexion",
+      "de": "Biegespannung",
+      "en": "Bending stress"
+    },
+    "bending-check": {
+      "fr": "Vérification flexion",
+      "de": "Nachweis Biegung",
+      "en": "Bending check"
+    },
+    "tension-side": {
+      "fr": "Côté tendu",
+      "de": "Biegezugseite",
+      "en": "Tension side"
+    },
+    "compression-side": {
+      "fr": "Côté comprimé",
+      "de": "Biegedruckseite",
+      "en": "Compression side"
+    },
+    "factor-tension-side": {
+      "fr": "Coefficient côté tendu",
+      "de": "Beiwert Biegezugseite",
+      "en": "Factor, tension side"
+    },
+    "factor-compression-side": {
+      "fr": "Coefficient côté comprimé",
+      "de": "Beiwert Biegedruckseite",
+      "en": "Factor, compression side"
+    },
+    "interaction-check": {
+      "fr": "Vérification combinée",
+      "de": "Interaktionsnachweis",
+      "en": "Interaction check"
+    },
+    "shear-force": {
+      "fr": "Effort tranchant",
+      "de": "Querkraft",
+      "en": "Shear force"
+    },
+    "shear-stress": {
+      "fr": "Contrainte de cisaillement",
+      "de": "Schubspannung",
+      "en": "Shear stress"
+    },
+    "shear-strength": {
+      "fr": "Résistance au cisaillement",
+      "de": "Schubfestigkeit",
+      "en": "Shear strength"
+    },
+    "shear-check": {
+      "fr": "Vérification effort tranchant",
+      "de": "Nachweis Schub",
+      "en": "Shear check"
+    },
+    "shear-off-force": {
+      "fr": "Force de cisaillement",
+      "de": "Abscherkraft",
+      "en": "Shear-off force"
+    },
+    "shear-off-length": {
+      "fr": "Longueur cisaillée",
+      "de": "Abscherlänge",
+      "en": "Sheared length"
+    },
+    "shear-off-length-min": {
+      "fr": "Longueur cisaillée minimale",
+      "de": "Mindestabscherlänge",
+      "en": "Minimum sheared length"
+    },
+    "shear-off-width": {
+      "fr": "Largeur cisaillée",
+      "de": "Abscherbreite",
+      "en": "Sheared width"
+    },
+    "shear-off-factor": {
+      "fr": "Coefficient de cisaillement",
+      "de": "Abscherbeiwert",
+      "en": "Shear-off factor"
+    },
+    "shear-off-check": {
+      "fr": "Vérification cisaillement",
+      "de": "Nachweis Abscheren",
+      "en": "Shear-off check"
+    },
+    "transverse-stress": {
+      "fr": "Contrainte perpendiculaire au fil",
+      "de": "Spannung rechtwinklig zur Faserrichtung",
+      "en": "Stress perpendicular to the grain"
+    },
+    "factor-transverse-tension": {
+      "fr": "Coefficient, traction transversale",
+      "de": "Beiwert Querzug",
+      "en": "Factor, transverse tension"
+    },
+    "factor-transverse-compression": {
+      "fr": "Coefficient, compression transversale",
+      "de": "Beiwert Querdruck",
+      "en": "Factor, transverse compression"
+    },
+    "factor-transverse": {
+      "fr": "Coefficient k_t,90",
+      "de": "Beiwert k_t,90",
+      "en": "Factor k_t,90"
+    },
+    "system-length-y": {
+      "fr": "Longueur du système (axe y)",
+      "de": "Systemlänge (Achse y)",
+      "en": "System length (axis y)"
+    },
+    "system-length-z": {
+      "fr": "Longueur du système (axe z)",
+      "de": "Systemlänge (Achse z)",
+      "en": "System length (axis z)"
+    },
+    "length-coefficient-y": {
+      "fr": "Coefficient de longueur de flambage (y)",
+      "de": "Knicklängenbeiwert (y)",
+      "en": "Buckling length coefficient (y)"
+    },
+    "length-coefficient-z": {
+      "fr": "Coefficient de longueur de flambage (z)",
+      "de": "Knicklängenbeiwert (z)",
+      "en": "Buckling length coefficient (z)"
+    },
+    "buckling-length-y": {
+      "fr": "Longueur de flambage (axe y)",
+      "de": "Knicklänge (Achse y)",
+      "en": "Buckling length (axis y)"
+    },
+    "buckling-length-z": {
+      "fr": "Longueur de flambage (axe z)",
+      "de": "Knicklänge (Achse z)",
+      "en": "Buckling length (axis z)"
+    },
+    "radius-of-gyration-y": {
+      "fr": "Rayon de giration (axe y)",
+      "de": "Trägheitsradius (Achse y)",
+      "en": "Radius of gyration (axis y)"
+    },
+    "radius-of-gyration-z": {
+      "fr": "Rayon de giration (axe z)",
+      "de": "Trägheitsradius (Achse z)",
+      "en": "Radius of gyration (axis z)"
+    },
+    "slenderness-y": {
+      "fr": "Élancement (axe y)",
+      "de": "Schlankheit (Achse y)",
+      "en": "Slenderness (axis y)"
+    },
+    "slenderness-z": {
+      "fr": "Élancement (axe z)",
+      "de": "Schlankheit (Achse z)",
+      "en": "Slenderness (axis z)"
+    },
+    "relative-slenderness-y": {
+      "fr": "Élancement relatif (axe y)",
+      "de": "Relative Schlankheit (Achse y)",
+      "en": "Relative slenderness (axis y)"
+    },
+    "relative-slenderness-z": {
+      "fr": "Élancement relatif (axe z)",
+      "de": "Relative Schlankheit (Achse z)",
+      "en": "Relative slenderness (axis z)"
+    },
+    "imperfection-factor": {
+      "fr": "Coefficient d'imperfection",
+      "de": "Imperfektionsbeiwert",
+      "en": "Imperfection factor"
+    },
+    "buckling-constant": {
+      "fr": "Constante de la relation (31)",
+      "de": "Konstante der Beziehung (31)",
+      "en": "Constant of (31)"
+    },
+    "slenderness-offset": {
+      "fr": "Décalage de l'élancement",
+      "de": "Schlankheitsversatz",
+      "en": "Slenderness offset"
+    },
+    "slenderness-limit": {
+      "fr": "Limite de l'élancement relatif",
+      "de": "Grenze der relativen Schlankheit",
+      "en": "Limit of the relative slenderness"
+    },
+    "buckling-auxiliary-y": {
+      "fr": "Valeur auxiliaire (axe y)",
+      "de": "Hilfswert (Achse y)",
+      "en": "Auxiliary value (axis y)"
+    },
+    "buckling-auxiliary-z": {
+      "fr": "Valeur auxiliaire (axe z)",
+      "de": "Hilfswert (Achse z)",
+      "en": "Auxiliary value (axis z)"
+    },
+    "buckling-factor-y": {
+      "fr": "Coefficient de flambage (axe y)",
+      "de": "Knickbeiwert (Achse y)",
+      "en": "Buckling factor (axis y)"
+    },
+    "buckling-factor-z": {
+      "fr": "Coefficient de flambage (axe z)",
+      "de": "Knickbeiwert (Achse z)",
+      "en": "Buckling factor (axis z)"
+    },
+    "buckling-check-y": {
+      "fr": "Vérification flambage (axe y)",
+      "de": "Nachweis Knicken (Achse y)",
+      "en": "Buckling check (axis y)"
+    },
+    "buckling-check-z": {
+      "fr": "Vérification flambage (axe z)",
+      "de": "Nachweis Knicken (Achse z)",
+      "en": "Buckling check (axis z)"
+    },
+    "lateral-support-distance": {
+      "fr": "Distance entre appuis latéraux",
+      "de": "Abstand der seitlichen Halterungen",
+      "en": "Distance between lateral supports"
+    },
+    "critical-stress-factor": {
+      "fr": "Coefficient de la relation (41)",
+      "de": "Beiwert der Beziehung (41)",
+      "en": "Factor of (41)"
+    },
+    "critical-bending-stress": {
+      "fr": "Contrainte critique de flexion",
+      "de": "Kritische Biegespannung",
+      "en": "Critical bending stress"
+    },
+    "relative-slenderness-m": {
+      "fr": "Élancement relatif de déversement",
+      "de": "Relative Kippschlankheit",
+      "en": "Relative slenderness for lateral buckling"
+    },
+    "lateral-factor": {
+      "fr": "Coefficient de déversement",
+      "de": "Kippbeiwert",
+      "en": "Lateral buckling factor"
+    },
+    "lateral-check": {
+      "fr": "Vérification déversement",
+      "de": "Nachweis Kippen",
+      "en": "Lateral torsional buckling check"
+    },
+    "section-check": {
+      "fr": "Vérification de la section",
+      "de": "Querschnittsnachweis",
+      "en": "Cross-section check"
+    },
+    "title-tension-perpendicular": {
+      "fr": "Traction perpendiculaire au fil",
+      "de": "Zug rechtwinklig zur Faserrichtung",
+      "en": "Tension perpendicular to the grain"
+    },
+    "text-tension-perpendicular": {
+      "fr": "Contrainte de traction uniforme perpendiculaire au fil.",
+      "de": "Gleichmässige Zugbeanspruchung rechtwinklig zur Faserrichtung.",
+      "en": "Uniform tension perpendicular to the grain."
+    },
+    "title-tension-angle": {
+      "fr": "Traction biaise par rapport au fil",
+      "de": "Zug unter einem Winkel zur Faserrichtung",
+      "en": "Tension at an angle to the grain"
+    },
+    "text-tension-angle": {
+      "fr": "Contrainte de traction biaise (angle α) par rapport au fil.",
+      "de": "Zugbeanspruchung unter einem Winkel α zur Faserrichtung.",
+      "en": "Tension at an angle α to the grain."
+    },
+    "title-compression-parallel": {
+      "fr": "Compression parallèle au fil",
+      "de": "Druck in Faserrichtung",
+      "en": "Compression parallel to the grain"
+    },
+    "text-compression-parallel": {
+      "fr": "Section seule, k_c = 1 : le flambage est la feuille « flambage ».",
+      "de": "Querschnitt allein, k_c = 1: das Knicken ist das Blatt «Knicken».",
+      "en": "Cross-section alone, k_c = 1: buckling is the sheet «buckling»."
+    },
+    "title-compression-perpendicular": {
+      "fr": "Compression perpendiculaire au fil",
+      "de": "Druck rechtwinklig zur Faserrichtung",
+      "en": "Compression perpendicular to the grain"
+    },
+    "text-compression-perpendicular": {
+      "fr": "Appui : la force sur la surface d'appui l · w, f_c,90,d du cas « generell » des tableaux 8 et 9.",
+      "de": "Auflager: die Kraft auf der Auflagerfläche l · w, f_c,90,d des Falls «generell» der Tabellen 8 und 9.",
+      "en": "Bearing: the force on the bearing area l · w, f_c,90,d of the case «generell» of Tables 8 and 9."
+    },
+    "title-compression-angle": {
+      "fr": "Compression biaise par rapport au fil",
+      "de": "Druck unter einem Winkel zur Faserrichtung",
+      "en": "Compression at an angle to the grain"
+    },
+    "text-compression-angle": {
+      "fr": "Contact sous un angle α au fil, sur la surface l · w.",
+      "de": "Kontakt unter einem Winkel α zur Faserrichtung, auf der Fläche l · w.",
+      "en": "Contact at an angle α to the grain, on the area l · w."
+    },
+    "title-bending": {
+      "fr": "Flexion parallèle au fil",
+      "de": "Biegung in Faserrichtung",
+      "en": "Bending parallel to the grain"
+    },
+    "text-bending": {
+      "fr": "Flexion autour de l'axe fort, section rectangulaire ; k_h du lamellé-collé de hauteur inférieure à la hauteur de référence (3.4.2.3). Pour le bois massif, k_h = 1.",
+      "de": "Biegung um die starke Achse, Rechteckquerschnitt; k_h für Brettschichtholz unter der Bezugshöhe (3.4.2.3). Für Vollholz ist k_h = 1.",
+      "en": "Bending about the strong axis, rectangular section; k_h of glulam below the reference height (3.4.2.3). For solid timber, k_h = 1."
+    },
+    "title-bending-biaxial": {
+      "fr": "Flexion déviée",
+      "de": "Doppelbiegung",
+      "en": "Biaxial bending"
+    },
+    "text-bending-biaxial": {
+      "fr": "Flexion autour des deux axes ; les deux rapports s'additionnent.",
+      "de": "Biegung um beide Achsen; die beiden Verhältnisse werden addiert.",
+      "en": "Bending about both axes; the two ratios are added."
+    },
+    "title-bending-angle": {
+      "fr": "Flexion biaise par rapport au fil",
+      "de": "Biegung unter einem Winkel zur Faserrichtung",
+      "en": "Bending at an angle to the grain"
+    },
+    "text-bending-angle": {
+      "fr": "Flexion de fibres inclinées d'un angle α : côté tendu et côté comprimé.",
+      "de": "Biegung bei unter dem Winkel α geneigten Fasern: Biegezug- und Biegedruckseite.",
+      "en": "Bending of fibres inclined at an angle α: tension and compression side."
+    },
+    "title-bending-tension": {
+      "fr": "Flexion combinée avec traction",
+      "de": "Biegung mit Zug",
+      "en": "Bending with tension"
+    },
+    "text-bending-tension": {
+      "fr": "Contraintes de flexion et de traction parallèles au fil.",
+      "de": "Gleichzeitige Zug- und Biegespannungen in Faserrichtung.",
+      "en": "Tension and bending stresses parallel to the grain."
+    },
+    "title-bending-compression": {
+      "fr": "Flexion combinée avec compression",
+      "de": "Biegung mit Druck",
+      "en": "Bending with compression"
+    },
+    "text-bending-compression": {
+      "fr": "Contraintes de flexion et de compression parallèles au fil, section seule ; la stabilité est la feuille « déversement avec compression ».",
+      "de": "Gleichzeitige Druck- und Biegespannungen in Faserrichtung, Querschnitt allein; die Stabilität ist das Blatt «Kippen mit Druck».",
+      "en": "Compression and bending stresses parallel to the grain, cross-section alone; stability is the sheet «lateral torsional buckling with compression»."
+    },
+    "title-shear": {
+      "fr": "Effort tranchant",
+      "de": "Schub",
+      "en": "Shear"
+    },
+    "text-shear": {
+      "fr": "Effort tranchant parallèle au fil, section rectangulaire : τ_d = 1.5 · V_d / A au centre de gravité.",
+      "de": "Schub parallel zur Faserrichtung, Rechteckquerschnitt: τ_d = 1.5 · V_d / A im Schwerpunkt.",
+      "en": "Shear parallel to the grain, rectangular section: τ_d = 1.5 · V_d / A at the centroid."
+    },
+    "title-shear-off": {
+      "fr": "Cisaillement",
+      "de": "Abscheren",
+      "en": "Shear-off"
+    },
+    "text-shear-off": {
+      "fr": "Force F sur la surface cisaillée l · w ; k_a du lamellé-collé (27), du bois massif (26).",
+      "de": "Kraft F auf der Abscherfläche l · w; k_a für Brettschichtholz (27), für Vollholz (26).",
+      "en": "Force F on the sheared area l · w; k_a of glulam (27), of solid timber (26)."
+    },
+    "title-shear-compression-perp": {
+      "fr": "Effort tranchant combiné avec un effort normal perpendiculaire au fil",
+      "de": "Schub und Normalkraft rechtwinklig zur Faserrichtung",
+      "en": "Shear with a normal force perpendicular to the grain"
+    },
+    "text-shear-compression-perp": {
+      "fr": "σ_90,d positif en traction transversale, négatif en compression transversale.",
+      "de": "σ_90,d positiv bei Querzug, negativ bei Querdruck.",
+      "en": "σ_90,d positive in transverse tension, negative in transverse compression."
+    },
+    "title-buckling": {
+      "fr": "Stabilité des barres comprimées (flambage)",
+      "de": "Stabilität von Druckstäben (Knicken)",
+      "en": "Stability of compression members (buckling)"
+    },
+    "text-buckling": {
+      "fr": "Barre comprimée centrée, rectitude dans les limites du chiffre 8.2.5 ; flambage autour des deux axes.",
+      "de": "Zentrisch gedrückter Stab, Geradheit innerhalb 8.2.5; Knicken um beide Achsen.",
+      "en": "Centrically compressed member, straightness within 8.2.5; buckling about both axes."
+    },
+    "title-lateral-torsional": {
+      "fr": "Stabilité des poutres fléchies (déversement)",
+      "de": "Stabilität von Biegeträgern (Kippen)",
+      "en": "Stability of beams in bending (lateral torsional buckling)"
+    },
+    "text-lateral-torsional": {
+      "fr": "Poutre rectangulaire fléchie autour de l'axe fort, appuis latéraux à distance a, courbure latérale dans les limites du chiffre 8.2.5.",
+      "de": "Rechteckträger, Biegung um die starke Achse, seitliche Halterungen im Abstand a, seitliche Vorkrümmung innerhalb 8.2.5.",
+      "en": "Rectangular beam bent about the strong axis, lateral supports a apart, lateral bow within 8.2.5."
+    },
+    "title-lateral-torsional-compression": {
+      "fr": "Flambage et déversement : flexion avec compression",
+      "de": "Knicken und Kippen: Biegung mit Druck",
+      "en": "Buckling and lateral torsional buckling: bending with compression"
+    },
+    "text-lateral-torsional-compression": {
+      "fr": "Barre comprimée et fléchie autour de l'axe fort : (37) autour de l'axe y, avec k_m ; autour de l'axe z, sans flexion autour de z, le flambage seul (29).",
+      "de": "Gedrückter und um die starke Achse gebogener Stab: (37) um die Achse y, mit k_m; um die Achse z, ohne Biegung um z, das Knicken allein (29).",
+      "en": "Member in compression and bending about the strong axis: (37) about the axis y, with k_m; about the axis z, with no bending about z, buckling alone (29)."
+    },
+    "title-lateral-torsional-tension": {
+      "fr": "Déversement avec traction",
+      "de": "Kippen mit Zug",
+      "en": "Lateral torsional buckling with tension"
+    },
+    "text-lateral-torsional-tension": {
+      "fr": "Poutre tendue et fléchie autour de l'axe fort : la section par (21), le déversement par (38).",
+      "de": "Gezogener und um die starke Achse gebogener Träger: der Querschnitt nach (21), das Kippen nach (38).",
+      "en": "Beam in tension and bending about the strong axis: the section by (21), lateral buckling by (38)."
     }
   },
   "paths": {
@@ -227,6 +757,101 @@
       "fr": "Sections",
       "de": "Sections",
       "en": "Sections"
+    },
+    "compression": {
+      "fr": "compression",
+      "de": "druck",
+      "en": "compression"
+    },
+    "bending": {
+      "fr": "flexion",
+      "de": "biegung",
+      "en": "bending"
+    },
+    "shear": {
+      "fr": "cisaillement",
+      "de": "schub",
+      "en": "shear"
+    },
+    "timber-stability": {
+      "fr": "stabilite-bois",
+      "de": "holz-stabilitaet",
+      "en": "timber-stability"
+    },
+    "tension-perpendicular": {
+      "fr": "traction-perpendiculaire",
+      "de": "zug-rechtwinklig",
+      "en": "tension-perpendicular"
+    },
+    "tension-angle": {
+      "fr": "traction-oblique",
+      "de": "zug-schraeg",
+      "en": "tension-angle"
+    },
+    "compression-parallel": {
+      "fr": "compression-axe",
+      "de": "druck-parallel",
+      "en": "compression-parallel"
+    },
+    "compression-perpendicular": {
+      "fr": "compression-perpendiculaire",
+      "de": "druck-rechtwinklig",
+      "en": "compression-perpendicular"
+    },
+    "compression-angle": {
+      "fr": "compression-oblique",
+      "de": "druck-schraeg",
+      "en": "compression-angle"
+    },
+    "bending-biaxial": {
+      "fr": "flexion-deviee",
+      "de": "doppelbiegung",
+      "en": "bending-biaxial"
+    },
+    "bending-angle": {
+      "fr": "flexion-oblique",
+      "de": "biegung-schraeg",
+      "en": "bending-angle"
+    },
+    "bending-tension": {
+      "fr": "flexion-traction",
+      "de": "biegung-zug",
+      "en": "bending-tension"
+    },
+    "bending-compression": {
+      "fr": "flexion-compression",
+      "de": "biegung-druck",
+      "en": "bending-compression"
+    },
+    "shear-off": {
+      "fr": "cisaillement-abscheren",
+      "de": "abscheren",
+      "en": "shear-off"
+    },
+    "shear-compression-perp": {
+      "fr": "cisaillement-compression-perp",
+      "de": "schub-querdruck",
+      "en": "shear-compression-perp"
+    },
+    "buckling": {
+      "fr": "flambage",
+      "de": "knicken",
+      "en": "buckling"
+    },
+    "lateral-torsional": {
+      "fr": "deversement",
+      "de": "kippen",
+      "en": "lateral-torsional"
+    },
+    "lateral-torsional-compression": {
+      "fr": "deversement-compression",
+      "de": "kippen-druck",
+      "en": "lateral-torsional-compression"
+    },
+    "lateral-torsional-tension": {
+      "fr": "deversement-traction",
+      "de": "kippen-zug",
+      "en": "lateral-torsional-tension"
     }
   }
 }

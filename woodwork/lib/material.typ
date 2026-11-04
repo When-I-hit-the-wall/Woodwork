@@ -17,6 +17,11 @@
 // The strengths a moisture class and impact multiply, and the values published as the table gives them.
 #let material-strengths = ("f_m_d", "f_t_0_d", "f_c_0_d", "f_t_90_d", "f_c_90_d", "f_v_d")
 #let material-as-given = ("f_m_k", "E_m_mean", "E_0_mean", "E_90_mean", "G_mean", "rho_k")
+// The characteristic values of SIA 265 Anhang B the stability of a member reads: solid timber (Tabelle 47), glulam (Tabelle 48).
+#let material-stability = (
+  (file: "../data/sia265/tab47-druckfestigkeit-e005-vollholz.json", key: "table_47", cite: "Tab. 47"),
+  (file: "../data/sia265/tab48-druckfestigkeit-e005-brettschichtholz.json", key: "table_48", cite: "Tab. 48"),
+)
 #let material-units = (rho_k: "kg/m³")
 // The cases of f_c,90,d in Tabelle 8 and 9.
 #let material-cases = ("generell", "mit_vorholz", "endauflagerung")
@@ -85,7 +90,7 @@
 #let material(id, moisture: 1, impact: false, case: "generell", larger: false, print: (), suffix: none, ..values) = {
   if values.pos().len() > 0 { panic("material: write the class first and every other argument by name -- material(\"GL24h\", moisture: 1)") }
   let given = values.named()
-  let known = material-strengths + material-as-given
+  let known = material-strengths + material-as-given + ("f_c_0_k", "E_0_05")
   for k in given.keys() {
     if not (k in known) { panic("material: " + repr(k) + " is not a value of a class -- " + known.map(x => repr(x)).join(", ")) }
     if type(given.at(k)) not in (int, float) { panic("material: " + k + ": is a number in the table's unit, got " + repr(given.at(k))) }
@@ -121,5 +126,22 @@
     let raw = given.at(k, default: row.at(k, default: none))
     if raw == none { continue }
     var(key(k), raw, material-units.at(k, default: "N/mm²"), label: if k in given { "Wert des Ingenieurs" } else { id }, norm: if k in given { none } else { found.norm }, norm-section: if k in given { none } else { found.cite }, display: if hidden(k) { "none" } else { auto })
+  }
+  // the characteristic values of Anhang B the stability reads (Tabelle 47, 48): f_c,0,k as given, E_0,05 times η_w for the stiffness (Tabelle 4) -- Woodcore's `_stiffness`
+  let stab = material-stability.map(t => json(t.file).at(t.key).grades.find(g => g.id == id)).find(g => g != none)
+  if stab != none or "E_0_05" in given or "f_c_0_k" in given {
+    let cite = material-stability.find(t => json(t.file).at(t.key).grades.find(g => g.id == id) != none)
+    let f-c-0-k = given.at("f_c_0_k", default: if stab == none { none } else { stab.f_c_0_k })
+    if f-c-0-k != none {
+      var(key("f_c_0_k"), f-c-0-k, "N/mm²", label: if "f_c_0_k" in given { "Wert des Ingenieurs" } else { id }, norm: if "f_c_0_k" in given { none } else { "SIA 265" }, norm-section: if "f_c_0_k" in given { none } else { cite.cite }, display: if hidden("f_c_0_k") { "none" } else { auto })
+    }
+    var(key("eta_w_E"), w.stiffness, "", label: "Feuchteklasse " + str(moisture), norm: "SIA 265", norm-section: "Tab. 4", display: if hidden("E_0_05") { "none" } else { auto })
+    if "E_0_05" in given {
+      var(key("E_0_05"), given.E_0_05, "N/mm²", label: "Wert des Ingenieurs", display: if hidden("E_0_05") { "none" } else { auto })
+    } else if stab != none {
+      var(key("E_0_05") + "_tab", stab.E_0_05, "N/mm²", label: id, norm: "SIA 265", norm-section: cite.cite, display: if hidden("E_0_05") { "none" } else { auto })
+      eq(key("E_0_05"), "eta_w_E" + suffix + " * " + key("E_0_05") + "_tab", unit: "N/mm²", norm: "SIA 265", norm-section: cite.cite,
+         display-formula: if hidden("E_0_05") { "none" } else { auto }, display-equation: if hidden("E_0_05") { "none" } else { auto })
+    }
   }
 }
