@@ -78,6 +78,10 @@ Without anything written, a line prints its label in a column at the left, then 
 
 Each case is a pair: a condition -- a relation between two formulas, as `#verify` reads one -- and a formula. The first case whose condition holds is computed and printed, alone; the last case is `auto`, which always holds.
 
+### Numbers (D-20)
+
+A number is printed with at most three decimals, its thousands set apart by an apostrophe from 1'000 to 99'999 (`28'000 mm²`), and as a mantissa and a power of ten beyond (`1.235 · 10⁵`).
+
 ### Keys and symbols (D-15)
 
 A key prints as a symbol: the part before the first `_` is the letter, a Greek name being its letter (`sigma` σ); every part after it is an index, separated by commas — `N_t_d` N<sub>t,d</sub>, `sigma_t_0_d` σ<sub>t,0,d</sub>, `f_t_alpha_d` f<sub>t,α,d</sub>. An index that is a word is upright: `E_0_mean` E<sub>0,mean</sub>, `k_dens` k<sub>dens</sub>.

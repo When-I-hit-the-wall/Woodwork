@@ -67,6 +67,24 @@
   (fmt-decimals(x / calc.pow(10.0, e), display-decimals), e)
 }
 
+// The thousands of a number printed, set apart by an apostrophe, the Swiss way (the engineer, 05.11.2026: «28'000 mm²»): 28000 → 28'000, 1234.5 → 1'234.5; a number of three digits or fewer is left as it is. Only the display groups: a value transported (`fmt-decimals`) never does.
+#let thousands-mark = "'"
+#let group-thousands(s) = {
+  if type(s) != str { return s }
+  let sign = if s.starts-with("-") { "-" } else { "" }
+  let body = s.trim("-", at: start)
+  let parts = body.split(".")
+  let whole = parts.at(0)
+  if whole.len() <= 3 or whole.match(regex("^[0-9]+$")) == none { return s }
+  let digits = whole.clusters().rev()
+  let grouped = ()
+  for (i, c) in digits.enumerate() {
+    if i > 0 and calc.rem(i, 3) == 0 { grouped.push(thousands-mark) }
+    grouped.push(c)
+  }
+  sign + grouped.rev().join("") + (if parts.len() > 1 { "." + parts.at(1) } else { "" })
+}
+
 /// A number as the report prints it, the one rule of every display (UI-002, UI-003): at most three decimals and no trailing zero, a minus sign for a negative one, and a mantissa and a power of ten past 99 999 or where three decimals would lose its first three significant digits. A string passes through.
 ///
 /// ```typ
@@ -82,7 +100,7 @@
 #let display-number(x) = {
   if type(x) != int and type(x) != float { return x }
   let (m, e) = display-parts(x)
-  signed-text(m) + if e == none { "" } else { " · 10" + sup(e) }
+  signed-text(group-thousands(m)) + if e == none { "" } else { " · 10" + sup(e) }
 }
 
 // The same number as **math source**, one atom: bare where it is a plain number (a negative one in parentheses, so "a - b" never reads "a - -b"), a quoted word where it carries a power of ten -- the superscript digits are text, and a quoted word is one atom, so `M / a` cannot read as M · (…/a).
@@ -90,6 +108,9 @@
   if type(x) != int and type(x) != float { return x }
   let (m, e) = display-parts(x)
   if e != none { return "\"" + display-number(x) + "\"" }
+  // a number with its thousands set apart is a quoted word: in math an apostrophe is a prime
+  let g = group-thousands(m)
+  if g != m { return if m.starts-with("-") { "(\"" + signed-text(g) + "\")" } else { "\"" + g + "\"" } }
   if m.starts-with("-") { "(" + m + ")" } else { m }
 }
 

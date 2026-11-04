@@ -1,9 +1,9 @@
 ---
 id: 2026-11-04-woodwork-feuilles-de-calcul
 titre: Woodwork — bibliothèque autonome de feuilles de calcul Typst
-status: verification
+status: completed
 cree: 2026-11-04
-mis_a_jour: 2026-11-04
+mis_a_jour: 2026-11-05
 source: message écrit (session du 04.11.2026, six messages) et artefact https://claude.ai/artifact/AAHzf9iDRPehnrmTQk7V8q (version 6)
 docs: [docs/typst/formulas.md, docs/typst/api-conventions.md, docs/architecture/principles.md, docs/domain/member-checks.md]
 ---
@@ -313,31 +313,31 @@ Messages de l'ingénieur, mot pour mot (session du 04.11.2026). Les quatre captu
 
 ## 11. Critères d'acceptation
 
-- [ ] REQ-001 — Woodwork compile hors de `305-typst-static-report/`, sans aucun chemin vers Woodcore.
-- [ ] REQ-002 — standard et détaillé compilent pour chaque vérification et donnent le même `eta`.
-- [ ] REQ-003 — trois arborescences de même taille, libellés traduits, mêmes valeurs.
-- [ ] REQ-004 — régénérer `sheets/` donne des fichiers identiques ; une clé manquante est nommée.
-- [ ] REQ-005 — héritage et écrasement par ligne vérifiés par test.
-- [ ] REQ-006 — `units: ("Nm",)` imprime 12 400 Nm ; deux unités de même dimension paniquent.
-- [ ] REQ-007 — `preset:` égale les réglages écrits ; un préréglage inconnu panique avec la liste.
-- [ ] REQ-008 — aucun `level:` dans `source/` ni `sheets/` ; affichage par défaut formule, puis valeurs, puis résultat.
-- [ ] REQ-009 — `#material("GL24h", moisture: 1)` donne 12.8 N/mm², `moisture: 2` 10.24 N/mm², et `as:` évite les collisions.
-- [ ] REQ-010 — `data/` au premier niveau, `_source` intact, valeurs égales à Woodcore.
-- [ ] REQ-011 — 18 vérifications de la phase 1 × 2 × 3 compilées, formules et articles égaux à `member_check.py`.
-- [ ] REQ-012 — `origin` = `When-I-hit-the-wall/Woodwork`, chaque étape poussée sur `main`.
-- [ ] REQ-013 — CLAUDE.md, `docs/`, 8 skills et 4 agents propres à Woodwork ; la spec déplacée dans `Woodwork/docs/requirements/`.
-- [ ] REQ-014 — skill `typst-sheet` présent et utilisé.
-- [ ] REQ-015 — trois formes, `#show: bfh`, sans page de titre.
-- [ ] REQ-016 — `titre-bfh`, `titre-neutral` en fr/de/en, champs écrits dans le fichier.
-- [ ] REQ-017 — 9 squelettes de documents qui compilent.
-- [ ] UI-001 — rendu conforme aux captures ; mots du moteur selon `text.lang`.
-- [ ] UI-002 — un argument nommé par ligne dans `sheets/`.
-- [ ] ARCH-001 — compile sans Python.
-- [ ] ARCH-002 — aucun chemin hors de `Woodwork/` dans `lib/`.
-- [ ] ARCH-003 — héritage par les cadres existants.
-- [ ] ARCH-004 — `sheets/` toujours généré.
-- [ ] Documentation : `Woodwork/README.md` (fr, de, en : copier une feuille, les arguments du domaine, `#material`, `data/`), `docs/` de Woodwork pour le mainteneur (générer, tester) ; dans Woodcore : `docs/decisions.md` (la séparation) et `CHANGELOG.md`.
-- [ ] Tests : `Woodwork/tests/` (génération, compilation de `examples/`, héritage, `units`, `preset`, `#material`, égalité avec les valeurs de `tests/test_member_check.py`).
+- [x] REQ-001 — Woodwork compile hors de `305-typst-static-report/`, sans aucun chemin vers Woodcore.
+- [x] REQ-002 — standard et détaillé compilent pour chaque vérification et donnent le même `eta`.
+- [x] REQ-003 — trois arborescences de même taille, libellés traduits, mêmes valeurs.
+- [x] REQ-004 — régénérer `sheets/` donne des fichiers identiques ; une clé manquante est nommée.
+- [x] REQ-005 — héritage et écrasement par ligne vérifiés par test.
+- [x] REQ-006 — `units: ("Nm",)` imprime 12 400 Nm ; deux unités de même dimension paniquent.
+- [x] REQ-007 — `preset:` égale les réglages écrits ; un préréglage inconnu panique avec la liste.
+- [x] REQ-008 — aucun `level:` dans `source/` ni `sheets/` ; affichage par défaut formule, puis valeurs, puis résultat.
+- [x] REQ-009 — `#material("GL24h", moisture: 1)` donne 12.8 N/mm², `moisture: 2` 10.24 N/mm², et `as:` évite les collisions.
+- [x] REQ-010 — `data/` au premier niveau, `_source` intact, valeurs égales à Woodcore.
+- [x] REQ-011 — 18 vérifications de la phase 1 × 2 × 3 compilées, formules et articles égaux à `member_check.py`.
+- [x] REQ-012 — `origin` = `When-I-hit-the-wall/Woodwork`, chaque étape poussée sur `main`.
+- [x] REQ-013 — CLAUDE.md, `docs/`, 8 skills et 4 agents propres à Woodwork ; la spec déplacée dans `Woodwork/docs/requirements/`.
+- [x] REQ-014 — skill `typst-sheet` présent et utilisé.
+- [x] REQ-015 — trois formes, `#show: bfh`, sans page de titre.
+- [x] REQ-016 — `titre-bfh`, `titre-neutral` en fr/de/en, champs écrits dans le fichier.
+- [x] REQ-017 — 9 squelettes de documents qui compilent.
+- [x] UI-001 — rendu conforme aux captures ; mots du moteur selon `text.lang`.
+- [x] UI-002 — un argument nommé par ligne dans `sheets/`.
+- [x] ARCH-001 — compile sans Python.
+- [x] ARCH-002 — aucun chemin hors de `Woodwork/` dans `lib/`.
+- [x] ARCH-003 — héritage par les cadres existants.
+- [x] ARCH-004 — `sheets/` toujours généré.
+- [x] Documentation : `Woodwork/README.md` (fr, de, en : copier une feuille, les arguments du domaine, `#material`, `data/`), `docs/` de Woodwork pour le mainteneur (générer, tester) ; dans Woodcore : `docs/decisions.md` (la séparation) et `CHANGELOG.md`.
+- [x] Tests : `Woodwork/tests/` (génération, compilation de `examples/`, héritage, `units`, `preset`, `#material`, égalité avec les valeurs de `tests/test_member_check.py`).
 
 ## 12. Traçabilité
 
@@ -492,23 +492,23 @@ Vérification indépendante (agent `requirements-verifier`, 04.11.2026, base af5
 
 | Élément | Verdict | Preuve |
 |---|---|---|
-| REQ-001 | ✅ (écart accepté à confirmer) | `woodwork/`, `source/`, `sheets/`, `templates/`, `examples/`, `tools/`, `tests/`, `docs/` ; `test_examples.py::test_one_sheet_copied_into_an_empty_project_compiles` (woodwork/ + une feuille, fr/de/en). `figures/` est dans `woodwork/figures/` pour voyager avec le moteur. Les mentions de Woodcore qui restent dans `woodwork/` sont des notes d'origine ; aucun chemin n'est lu (`test_the_engine_reads_nothing_outside_woodwork`). |
+| REQ-001 | ✅ (confirmé) | `woodwork/`, `source/`, `sheets/`, `templates/`, `examples/`, `tools/`, `tests/`, `docs/` ; `test_examples.py::test_one_sheet_copied_into_an_empty_project_compiles` (woodwork/ + une feuille, fr/de/en). `figures/` est dans `woodwork/figures/` pour voyager avec le moteur. Les mentions de Woodcore qui restent dans `woodwork/` sont des notes d'origine ; aucun chemin n'est lu (`test_the_engine_reads_nothing_outside_woodwork`). |
 | REQ-002 | ✅ | `test_sheets.py::test_every_sheet_compiles_and_both_levels_agree` (18 × 3, standard = détaillée). |
 | REQ-003 | ✅ | `test_sheets.py::test_a_sheet_says_the_same_in_its_three_languages`, `test_generate.py` (trois arborescences égales, aucune clé restante, aucun libellé anglais en français). |
 | REQ-004, ARCH-004 | ✅ | `test_generate.py::test_the_trees_are_what_the_generator_writes` (`--check`), clé et langue manquantes nommées. |
 | REQ-005, ARCH-003, ARCH-007 | ✅ | `test_domain_defaults.py` (8), `state(` : 4 dans `lib/` contre 16 chez Woodcore. |
-| REQ-006 | ✅ (écart de critère) | `test_units.py` (3). Le moteur imprime « 12400 Nm » (règle `display-number` de Woodcore, sans séparateur de milliers), pas « 12 400 Nm ». |
+| REQ-006 | ✅ | `test_units.py` (3) : « 12'400 Nm » (D-20). |
 | REQ-007 | ✅ | `test_preset.py` (4). |
-| REQ-008 | ✅ (écart de critère) | aucun `level:` dans `source/`, `sheets/`, `templates/` ; `test_the_default_rendering_needs_no_argument_and_no_level` : « A = b ⋅ h = 140 mm ⋅ 200 mm = 28000 mm² » (sans espace de milliers). |
-| REQ-009 | ⚠️ à confirmer | `test_material.py` (12) dont la valeur de l'ingénieur imprimée. `as:` devenu `suffix:` (mot réservé de Typst) : à confirmer par l'ingénieur. |
-| REQ-010 | ⚠️ partiel, voulu | `woodwork/data/` (57 tables, `_source`, valeurs égales à Woodcore, `test_data.py`). Les noms gardent le titre allemand de Woodcore (`tab09-brettschichtholz.json`) ; SIA 261, 263 et SZS C5 viendront avec les phases 2 et 3 (étape 5 du plan). |
+| REQ-008 | ✅ | aucun `level:` dans `source/`, `sheets/`, `templates/` ; `test_the_default_rendering_needs_no_argument_and_no_level` : « A = b ⋅ h = 140 mm ⋅ 200 mm = 28'000 mm² » (D-20), `test_thousands_are_set_apart_by_an_apostrophe`. |
+| REQ-009 | ✅ | `test_material.py` (12) dont la valeur de l'ingénieur imprimée. `as:` devenu `suffix:` (mot réservé de Typst), confirmé par l'ingénieur le 05.11.2026 (D-21). |
+| REQ-010 | ✅ (périmètre de la phase 1, confirmé) | `woodwork/data/` (57 tables, `_source`, valeurs égales à Woodcore, `test_data.py`). Les noms gardent le titre allemand de Woodcore (`tab09-brettschichtholz.json`) ; SIA 261, 263 et SZS C5 viendront avec les phases 2 et 3 (étape 5 du plan). |
 | REQ-011 | ✅ | `test_sheets.py::test_the_utilisations_are_woodcores` : les 18 η égaux à `member_check.compute` de Woodcore à 1e-9 ; formules et articles repris de `member_check.py` (relus, pas testés un à un). |
 | REQ-012 | ✅ | `origin` = When-I-hit-the-wall/Woodwork, `main`, un commit poussé par étape. |
 | REQ-013, REQ-014 | ✅ | 10 skills, 4 agents, `test_tooling.py`. |
 | REQ-015 | ✅ | `test_templates.py` : une fonction par forme, sans page de titre, en-tête et pied de page BFH, police Lucida/Segoe/Arial. |
-| REQ-016 | ⚠️ à confirmer | `test_a_title_page_has_neither_header_nor_footer`, champs écrits dans le fichier. Nom français `titre-neutre` au lieu de « titre-neutral » : à confirmer. |
+| REQ-016 | ✅ | `test_a_title_page_has_neither_header_nor_footer`, champs écrits dans le fichier. Nom français `titre-neutre`, confirmé le 05.11.2026 (D-21). |
 | REQ-017 | ✅ | `test_the_nine_document_skeletons_compile`, `test_no_skeleton_reads_a_woodcore_project`. |
-| UI-001 | ⚠️ relecture de l'ingénieur | rendu testé par le texte extrait (libellé à gauche, formule, nombres, résultat, citation à droite), mots du moteur selon `text.lang` ; reste la relecture du PDF `examples/fr.typ` par l'ingénieur. |
+| UI-001 | ✅ | rendu testé par le texte extrait (libellé à gauche, formule, nombres, résultat, citation à droite), mots du moteur selon `text.lang` ; rendu confirmé par l'ingénieur le 05.11.2026, avec les milliers en « ' » (D-20). |
 | UI-002 | ✅ | `test_one_named_argument_a_line`. |
 | ARCH-001 | ✅ | `test_examples.py::test_the_examples_compile_alone` (Typst seul). |
 | ARCH-002, ARCH-005 | ✅ | `test_engine_standalone.py` (aucun chemin hors de `woodwork/`, fonctions de Woodcore absentes, `wc-meta` retiré). |
@@ -535,3 +535,4 @@ Vérification indépendante (agent `requirements-verifier`, 04.11.2026, base af5
 | 2026-11-04 | implementation | étape 8 : les 17 vérifications restantes, sources dans `source/sheets/` et `source/parts/` (un `-action` et un `-check` par vérification, partagés par la feuille standard et la détaillée), 9 figures SVG, ~80 libellés en fr/de/en ; titres des feuilles = intitulés de SIA 265:2021 FR et DE (4.2.1 à 4.2.9) ; formules et articles de `member_check.py` et `member_check_stability.py` de Woodcore ; constantes lues par `from:` (k_h 3.4.2.3, β_c, k, λ_rel 4.2.8, facteur de (41), k_a et longueur minimale 4.2.6, k_t,90 4.2.7) ; k_c (30), k_m (39), k_h (5) et k_t,90 par `cases:`. Le moteur lit maintenant un exposant variable (k_h = (h_ref/h)^0.1, l'exposant lu dans la table). `#material` publie f_c,0,k, η_w,E et E_0,05 (Anhang B, Tab. 47 et 48). Exemples ajustés pour que chaque feuille parte d'un cas vérifié (η de 0.17 à 0.87). (37) sur l'axe z sans flexion autour de z = (29), comme Woodcore. Tests : `test_sheets.py` (3) : 108 feuilles compilent, standard = détaillée, les 18 η égaux à `member_check.compute` de Woodcore à 1e-9. REQ-002, REQ-011, UI-001. Reste : étape 9 (README fr/de/en, nettoyage des `///` du moteur, decisions/CHANGELOG de Woodcore, vérification indépendante) |
 | 2026-11-04 | testing | étape 9 : `README.md` en fr/de/en (copier `woodwork/` et une feuille, exemple, formes et fonds) ; exemples `///` du moteur sans l'export de Woodcore ; Woodcore : entrée de `docs/decisions.md` et de `CHANGELOG.md`, commit local (non poussé, la poussée de Woodcore attend l'ingénieur). Suite complète : 63 passés. Reste : vérification indépendante, `finish` |
 | 2026-11-04 | verification | vérification indépendante : 11 fichiers de tests verts ; ⚠️ corrigés : `examples/` (généré par `tools/generate.py`, `test_examples.py`), `wc-meta` retiré, commentaires qui décrivaient la lecture de `calc/norms/` et `calc/i18n/` réécrits, preuves ajoutées (mêmes η dans les trois langues, page de titre sans en-tête ni pied de page, police de la forme BFH, valeur de l'ingénieur imprimée), `docs/typst/engine.md` écrit. Restent à confirmer par l'ingénieur : `suffix:`, `titre-neutre`, le format « 28000 », la relecture du PDF des exemples. §15 rempli |
+| 2026-11-05 | completed | l'ingénieur confirme `suffix:`, `titre-neutre`, le périmètre des tables, la place des figures et le rendu, et demande les milliers en « 28'000 mm² » : `group-thousands` dans `woodwork/lib/number.typ` (D-20, D-21), tests mis à jour. Suite complète verte. Spec déplacée dans `completed/` |

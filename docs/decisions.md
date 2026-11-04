@@ -1,6 +1,6 @@
 # Decisions
 
-Each settled decision: what, why, what it costs. The founding ones are those of the spec `requirements/active/2026-11-04-woodwork-feuilles-de-calcul.md` §7, taken by the engineer on 4 November 2026.
+Each settled decision: what, why, what it costs. The founding ones are those of the spec `requirements/completed/2026-11-04-woodwork-feuilles-de-calcul.md` §7, taken by the engineer on 4 November 2026.
 
 ## D-1 — A copy that lives alone
 Woodwork's engine and tables were taken from Woodcore once; nothing links the two since. Cost: a fix in one does not reach the other.
@@ -46,6 +46,12 @@ The engineer's choice (Q-011) over a command publishing a whole clause and over 
 
 ## D-19 — A formula by cases is `#eq(…, cases:)`
 The engineer's choice (Q-012) over an `if` inside the formula and over Typst's own `#if`: the line prints the case that held, alone. k_m of SIA 265 (39) cannot be written exactly with `min` and `max`.
+
+## D-20 — Thousands set apart by an apostrophe
+The engineer, 5 November 2026: «je préfère cette manière d'écrire : 28'000 mm²». Every number printed from 1'000 to 99'999 groups its thousands with «'» (`group-thousands` in `woodwork/lib/number.typ`); past 99'999 a power of ten, as before; a value transported for Typst to evaluate again is never grouped. In a formula the grouped number is a quoted word (an apostrophe in math is a prime); the forms set math's font on it all the same. Woodcore prints 28000.
+
+## D-21 — `suffix:` and `titre-neutre`, confirmed
+`#material(…, suffix: "1")` (Typst refuses `as` as an argument's name) and the French title page `titre-neutre` (the engineer wrote «titre-neutral»): both confirmed by the engineer on 5 November 2026.
 
 ## Licence — GPL-3.0
 Woodwork's engine derives from Woodcore, which is GPL-3.0.

@@ -16,9 +16,9 @@ def test_units_of_a_domain_hold_for_values_and_results():
 """)
     assert ok, err
     t = pdf_text(pdf)
-    assert "Moment 𝑀d = 12400 Nm" in t, t
+    assert "Moment 𝑀d = 12'400 Nm" in t, t
     assert t.splitlines()[-1] == "Dehors 𝑀e = 12.4 kNm", t
-    assert "2 m = 12400 Nm" in t and "2 m = 12.4 kNm" in t, t
+    assert "2 m = 12'400 Nm" in t and "2 m = 12.4 kNm" in t, t
 
 
 def test_two_units_of_one_dimension_are_refused_naming_both():

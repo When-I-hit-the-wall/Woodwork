@@ -55,7 +55,7 @@ def test_a_line_overrides_what_the_domain_set():
 def test_the_default_rendering_needs_no_argument_and_no_level():
     # D-12: label left, formula, numbers, result -- with nothing but the label written
     t = text_of('#var("b", 140, "mm", label: "Largeur")\n#var("h", 200, "mm")\n#eq("A", `b * h`, label: "Section")\n')
-    assert "Section 𝐴 = 𝑏 ⋅ ℎ = 140 mm ⋅ 200 mm = 28000 mm²" in t, t
+    assert "Section 𝐴 = 𝑏 ⋅ ℎ = 140 mm ⋅ 200 mm = 28'000 mm²" in t, t
     assert t.splitlines()[0].startswith("Largeur"), t
 
 
@@ -85,3 +85,10 @@ def test_the_domain_keeps_its_variables_apart():
                 .replace("#context [#metadata(var-registry-final()) <r>]", '#import "/woodwork/lib/calc-engine.typ": var-registry\n#context [#metadata(var-registry.final().domains) <r>]'), "<r>")
     domains = got[0]["value"]
     assert domains[""]["F"]["value"] == 1 and domains["a"]["F"]["value"] == 2, domains
+
+
+def test_thousands_are_set_apart_by_an_apostrophe():
+    # the engineer, 05.11.2026: «28'000 mm²» -- from 1'000 to 99'999; past it a power of ten, as before
+    t = text_of('#import "/woodwork/lib/number.typ": display-number\n'
+                '#display-number(28000) #display-number(1234.5) #display-number(-12400) #display-number(999) #display-number(123456)\n')
+    assert t.splitlines()[0] == "28'000 1'234.5 −12'400 999 1.235 · 10⁵", t

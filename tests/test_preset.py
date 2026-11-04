@@ -39,4 +39,4 @@ def test_a_preset_may_set_units_and_norm():
     ok, _, err, pdf = compile_typ(HEAD + '#domain("t", preset: "office")[\n  #var("M_d", 12.4, "kNm", norm-section: "4.2.3")\n]\n',
                                   files={"woodwork/data/presets.json": json.dumps({"presets": {"office": {"units": ["Nm"], "norm": "SIA 265", "norm-position": "right"}}})})
     assert ok, err
-    assert pdf_text(pdf).strip().endswith("12400 Nm SIA 265 4.2.3"), pdf_text(pdf)
+    assert pdf_text(pdf).strip().endswith("12'400 Nm SIA 265 4.2.3"), pdf_text(pdf)
