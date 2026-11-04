@@ -1,0 +1,29 @@
+#import "/woodwork/woodwork.typ": *
+
+== Purpose of the service criteria agreement
+
+In accordance with SIA 260 (2013), 2.1.2 and 2.2, the service requirements that lead to a suitable structural concept are recorded in a service criteria agreement. It is drawn up on the basis of a dialogue between the owner and the design engineers, in language the owner can understand, and sets out the bases and requirements of the project. It comprises:
+
+- general aims for the use (service situations and service life) of the construction works;
+- ambient conditions and third-party requirements;
+- operational and maintenance requirements;
+- special requirements of the owner;
+- objectives of protection and special risks;
+- code-related requirements.
+
+It thus contains the overriding decisions specific to the building and serves as the basis for the preliminary design. The objectives and the degree of protection are determined on the basis of a risk evaluation (2.2.3).
+
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Service criteria agreement], [Overriding decisions specific to the building, prepared with the owner; basis for the preliminary design.],
+    [Basis of design], [Translates the service criteria agreement into the technical language of engineers, specialists and contractors: actions, material and ground properties, geometrical properties and the resulting effects.],
+    [Monitoring plan and maintenance plan], [Drawn up by the operator of the building: they set out the type of monitoring and inspection and any measures to be taken.],
+    table.hline(stroke: 1pt),
+  ),
+  caption: [The documents of the building],
+)
+
+In special or simple cases, one or other of these documents may be dispensed with, in agreement with the owner.

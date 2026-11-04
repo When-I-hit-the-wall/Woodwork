@@ -1,23 +1,232 @@
 {
   "_note": "Every word of a sheet or a content template, by key, in the three languages (tools/generate.py replaces each {key} of source/ by its text). The terms of a clause are those of the edition of the norm in that language (SIA 265:2021 DE and FR; English after EN 1995 where SIA has no English edition); `paths` names every folder and file in fr and de, English being the source's own name.",
   "labels": {
-    "title-tension-parallel": {"fr": "Traction parallèle au fil", "de": "Zug in Faserrichtung", "en": "Tension parallel to the grain"},
-    "text-tension-parallel": {"fr": "Barre tendue, effort de traction centré, section non affaiblie.", "de": "Zugstab, mittige Zugkraft, ungeschwächter Querschnitt.", "en": "Tension member, centric tensile force, unweakened cross-section."},
-    "tension-force": {"fr": "Effort de traction", "de": "Zugkraft", "en": "Tensile force"},
-    "section-width": {"fr": "Largeur", "de": "Breite", "en": "Width"},
-    "section-height": {"fr": "Hauteur", "de": "Höhe", "en": "Height"},
-    "cross-sectional-area": {"fr": "Aire de la section", "de": "Querschnittsfläche", "en": "Cross-sectional area"},
-    "tensile-stress": {"fr": "Contrainte de traction", "de": "Zugspannung", "en": "Tensile stress"},
-    "tensile-strength": {"fr": "Résistance à la traction", "de": "Zugfestigkeit", "en": "Tensile strength"},
-    "tension-check": {"fr": "Vérification traction", "de": "Nachweis Zug", "en": "Tension check"},
-    "heading-material": {"fr": "Matériau", "de": "Baustoff", "en": "Material"},
-    "heading-action-and-section": {"fr": "Sollicitation et section", "de": "Beanspruchung und Querschnitt", "en": "Action effect and cross-section"},
-    "heading-check": {"fr": "Vérification", "de": "Nachweis", "en": "Check"}
+    "title-tension-parallel": {
+      "fr": "Traction parallèle au fil",
+      "de": "Zug in Faserrichtung",
+      "en": "Tension parallel to the grain"
+    },
+    "text-tension-parallel": {
+      "fr": "Barre tendue, effort de traction centré, section non affaiblie.",
+      "de": "Zugstab, mittige Zugkraft, ungeschwächter Querschnitt.",
+      "en": "Tension member, centric tensile force, unweakened cross-section."
+    },
+    "tension-force": {
+      "fr": "Effort de traction",
+      "de": "Zugkraft",
+      "en": "Tensile force"
+    },
+    "section-width": {
+      "fr": "Largeur",
+      "de": "Breite",
+      "en": "Width"
+    },
+    "section-height": {
+      "fr": "Hauteur",
+      "de": "Höhe",
+      "en": "Height"
+    },
+    "cross-sectional-area": {
+      "fr": "Aire de la section",
+      "de": "Querschnittsfläche",
+      "en": "Cross-sectional area"
+    },
+    "tensile-stress": {
+      "fr": "Contrainte de traction",
+      "de": "Zugspannung",
+      "en": "Tensile stress"
+    },
+    "tensile-strength": {
+      "fr": "Résistance à la traction",
+      "de": "Zugfestigkeit",
+      "en": "Tensile strength"
+    },
+    "tension-check": {
+      "fr": "Vérification traction",
+      "de": "Nachweis Zug",
+      "en": "Tension check"
+    },
+    "heading-material": {
+      "fr": "Matériau",
+      "de": "Baustoff",
+      "en": "Material"
+    },
+    "heading-action-and-section": {
+      "fr": "Sollicitation et section",
+      "de": "Beanspruchung und Querschnitt",
+      "en": "Action effect and cross-section"
+    },
+    "heading-check": {
+      "fr": "Vérification",
+      "de": "Nachweis",
+      "en": "Check"
+    },
+    "title-bfh-about": {
+      "fr": "Page de titre de la forme BFH : un template de fond. Copiez ce fichier à côté de votre document, remplissez les champs ci-dessous et incluez-le en premier : #include \"titre-bfh.typ\".",
+      "de": "Titelseite der Form BFH: eine Inhaltsvorlage. Kopieren Sie diese Datei neben Ihr Dokument, füllen Sie die Felder unten aus und binden Sie sie als Erstes ein: #include \"titel-bfh.typ\".",
+      "en": "Title page of the BFH form: a content template. Copy this file beside your document, fill in the fields below and include it first: #include \"title-bfh.typ\"."
+    },
+    "title-neutral-about": {
+      "fr": "Page de titre de la forme neutre : un template de fond. Copiez ce fichier à côté de votre document, remplissez les champs ci-dessous et incluez-le en premier : #include \"titre-neutre.typ\".",
+      "de": "Titelseite der neutralen Form: eine Inhaltsvorlage. Kopieren Sie diese Datei neben Ihr Dokument, füllen Sie die Felder unten aus und binden Sie sie als Erstes ein: #include \"titel-neutral.typ\".",
+      "en": "Title page of the neutral form: a content template. Copy this file beside your document, fill in the fields below and include it first: #include \"title-neutral.typ\"."
+    },
+    "title-edit-here": {
+      "fr": "À REMPLIR",
+      "de": "HIER AUSFÜLLEN",
+      "en": "FILL IN HERE"
+    },
+    "title-edit-help": {
+      "fr": "Tout ce qui est entre guillemets est imprimé tel quel ; un champ vide n'imprime pas de ligne.",
+      "de": "Alles in Anführungszeichen wird so gedruckt; ein leeres Feld druckt keine Zeile.",
+      "en": "Everything in quotes is printed as written; an empty field prints no line."
+    },
+    "title-document-help": {
+      "fr": "Le document, le projet et son numéro.",
+      "de": "Das Dokument, das Projekt und seine Nummer.",
+      "en": "The document, the project and its number."
+    },
+    "title-rows-help": {
+      "fr": "Une ligne par rubrique : son libellé, puis une liste de valeurs, une par ligne. Supprimez une rubrique, ou laissez sa liste vide : ().",
+      "de": "Eine Zeile pro Rubrik: ihre Bezeichnung, dann eine Liste von Werten, einer pro Zeile. Löschen Sie eine Rubrik oder lassen Sie ihre Liste leer: ().",
+      "en": "One line per entry: its label, then a list of values, one per line. Delete an entry, or leave its list empty: ()."
+    },
+    "title-date-help": {
+      "fr": "La date : auto est le jour de la compilation ; datetime(year: 2026, month: 11, day: 4) un jour choisi ; none aucune date.",
+      "de": "Das Datum: auto ist der Tag der Kompilierung; datetime(year: 2026, month: 11, day: 4) ein gewählter Tag; none kein Datum.",
+      "en": "The date: auto is the day the document is compiled; datetime(year: 2026, month: 11, day: 4) a day of your own; none no date."
+    },
+    "title-layout": {
+      "fr": "MISE EN PAGE (Typst ordinaire, modifiable aussi)",
+      "de": "SEITENGESTALTUNG (gewöhnliches Typst, ebenfalls anpassbar)",
+      "en": "LAYOUT (plain Typst, yours to change as well)"
+    },
+    "document-statical-report": {
+      "fr": "Rapport de statique",
+      "de": "Statischer Bericht",
+      "en": "Statical report"
+    },
+    "placeholder-project-name": {
+      "fr": "Nom du projet",
+      "de": "Projektname",
+      "en": "Project name"
+    },
+    "placeholder-project-number": {
+      "fr": "N° 0000",
+      "de": "Nr. 0000",
+      "en": "No. 0000"
+    },
+    "placeholder-person": {
+      "fr": "Prénom Nom",
+      "de": "Vorname Name",
+      "en": "First name Last name"
+    },
+    "placeholder-client": {
+      "fr": "Mandant",
+      "de": "Auftraggeber",
+      "en": "Client"
+    },
+    "placeholder-address": {
+      "fr": "Rue 1, 0000 Lieu",
+      "de": "Strasse 1, 0000 Ort",
+      "en": "Street 1, 0000 Place"
+    },
+    "label-author": {
+      "fr": "Rédigé par",
+      "de": "Verfasst von",
+      "en": "Written by"
+    },
+    "label-checker": {
+      "fr": "Encadrement",
+      "de": "Betreuung",
+      "en": "Supervision"
+    },
+    "label-client": {
+      "fr": "Mandant",
+      "de": "Auftraggeber",
+      "en": "Client"
+    },
+    "label-address": {
+      "fr": "Lieu du projet",
+      "de": "Projektort",
+      "en": "Project location"
+    },
+    "bfh-department": {
+      "fr": "Architecture, bois et génie civil",
+      "de": "Architektur, Holz und Bau",
+      "en": "Architecture, Wood and Civil Engineering"
+    },
+    "bfh-programme": {
+      "fr": "BSc Technique du bois",
+      "de": "BSc Holztechnik",
+      "en": "BSc Wood Technology"
+    },
+    "bfh-place": {
+      "fr": "Bienne",
+      "de": "Biel",
+      "en": "Biel/Bienne"
+    },
+    "month-names": {
+      "fr": "janvier,février,mars,avril,mai,juin,juillet,août,septembre,octobre,novembre,décembre",
+      "de": "Januar,Februar,März,April,Mai,Juni,Juli,August,September,Oktober,November,Dezember",
+      "en": "January,February,March,April,May,June,July,August,September,October,November,December"
+    },
+    "long-date-pattern": {
+      "fr": "(if d.day() == 1 { \"1er\" } else { str(d.day()) }) + \" \" + months.at(d.month() - 1) + \" \" + str(d.year())",
+      "de": "str(d.day()) + \". \" + months.at(d.month() - 1) + \" \" + str(d.year())",
+      "en": "str(d.day()) + \" \" + months.at(d.month() - 1) + \" \" + str(d.year())"
+    }
   },
   "paths": {
-    "timber-sections": {"fr": "sections-bois", "de": "holzquerschnitte", "en": "timber-sections"},
-    "tension": {"fr": "traction", "de": "zug", "en": "tension"},
-    "tension-parallel": {"fr": "traction-axe", "de": "zug-parallel", "en": "tension-parallel"},
-    "detailed": {"fr": "detaille", "de": "detailliert", "en": "detailed"}
+    "timber-sections": {
+      "fr": "sections-bois",
+      "de": "holzquerschnitte",
+      "en": "timber-sections"
+    },
+    "tension": {
+      "fr": "traction",
+      "de": "zug",
+      "en": "tension"
+    },
+    "tension-parallel": {
+      "fr": "traction-axe",
+      "de": "zug-parallel",
+      "en": "tension-parallel"
+    },
+    "detailed": {
+      "fr": "detaille",
+      "de": "detailliert",
+      "en": "detailed"
+    },
+    "title-bfh": {
+      "fr": "titre-bfh",
+      "de": "titel-bfh",
+      "en": "title-bfh"
+    },
+    "title-neutral": {
+      "fr": "titre-neutre",
+      "de": "titel-neutral",
+      "en": "title-neutral"
+    },
+    "service-criteria-agreement": {
+      "fr": "convention-d-utilisation",
+      "de": "nutzungsvereinbarung",
+      "en": "service-criteria-agreement"
+    },
+    "basis-of-design": {
+      "fr": "base-de-projet",
+      "de": "projektbasis",
+      "en": "basis-of-design"
+    },
+    "statical-report": {
+      "fr": "rapport-de-statique",
+      "de": "statischer-bericht",
+      "en": "statical-report"
+    },
+    "Sections": {
+      "fr": "Sections",
+      "de": "Sections",
+      "en": "Sections"
+    }
   }
 }

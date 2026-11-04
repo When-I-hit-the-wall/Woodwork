@@ -56,6 +56,26 @@ Without anything written, a line prints its label in a column at the left, then 
 
 A key prints as a symbol: the part before the first `_` is the letter, a Greek name being its letter (`sigma` σ); every part after it is an index, separated by commas — `N_t_d` N<sub>t,d</sub>, `sigma_t_0_d` σ<sub>t,0,d</sub>, `f_t_alpha_d` f<sub>t,α,d</sub>. An index that is a word is upright: `E_0_mean` E<sub>0,mean</sub>, `k_dens` k<sub>dens</sub>.
 
+## Forms and content templates
+
+A **form** is the look of a document (decisions D-17): one file of `woodwork/forms/`, one function of its name, called by Typst's own rule.
+
+```typ
+#import "/woodwork/forms/bfh.typ": bfh
+#set text(lang: "fr")
+#show: bfh
+```
+
+`neutral` (A4, 2.5 cm margins, 11 pt, page number centred), `compact` (2 cm margins, 10 pt) and `bfh` (the Berner Fachhochschule's colours, Lucida Sans, its logo and the current chapter in the header, the school's names and the page in the footer, a chapter to a page). `#show: bfh.with(lang: "de")` also sets the language Typst works in; without it the form keeps the document's. A form prints no title page.
+
+A **title page** is a content template: `templates/<lang>/titre-bfh.typ` (or `titre-neutre.typ`), copied beside the document, its fields filled at its top (document, project, number, rows of people, date), included first: `#include "titre-bfh.typ"`. It is a page of its own, with neither header nor footer.
+
+The three **documents** -- convention d'utilisation, base de projet, rapport de statique -- are skeletons in `templates/<lang>/`: an entry file that sets the form and includes the title page and the sections, and `Sections/` with Woodcore's headings, prose and tables to fill; where Woodcore printed its export, a comment says what to paste.
+
+## `#show-norm-list`
+
+`#show-norm-list(keys: ("SIA 260", "SIA 261", "SIA 265"))` lists the documents named, in full -- designation, title, publisher and edition -- as `woodwork/data/norms.json` gives them, and cites each for the bibliography. A key may be content of one's own, `[Lärmschutz-Verordnung (LSV)]`. Taken from Woodcore's `lib/document.typ`.
+
 ## `#material` — a strength class and its design values
 
 ```typ

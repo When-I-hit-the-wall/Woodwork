@@ -9,3 +9,4 @@
 #import "lib/formula.typ": domain, var, eq, verify, unit, calc-defaults, var-table, show-bibliography, cite-norm
 #import "lib/calc-engine.typ": get, report-level, number-digits
 #import "lib/material.typ": material
+#import "lib/norm-list.typ": show-norm-list

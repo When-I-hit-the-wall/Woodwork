@@ -21,6 +21,8 @@ KEY = re.compile(r"\{([a-z][a-z0-9]*(?:-[a-z0-9]+)+)\}")
 # A line `// @insert <name>` is replaced by source/parts/<name>.typ: the lines a standard and a detailed sheet share, written once and copied into both, so that each generated sheet stands alone.
 INSERT = re.compile(r"^[ \t]*// @insert ([\w-]+)[ \t]*\n", re.M)
 PARTS = SOURCE / "parts"
+# A file `name.fr.typ` (de, en) is of one language: written to that tree alone, as it is.
+ONE_LANGUAGE = re.compile(r"^(.*)\.(fr|de|en)\.typ$")
 
 
 class GenerationError(Exception):
@@ -97,6 +99,18 @@ def plan():
             continue
         for f in sorted(p for p in src.rglob("*") if p.is_file()):
             rel = f.relative_to(src)
+            own = ONE_LANGUAGE.match(f.name)
+            if own:
+                # a file of one language (a section of a document, written in each language by hand): to that tree alone, its name and text as they are, its folders translated
+                lang = own.group(2)
+                where = rel.as_posix()
+                folders = [translate_name(p, lang, paths, where) for p in rel.parts[:-1]]
+                target = ROOT / kind / lang / Path(*folders, own.group(1) + ".typ")
+                data = f.read_bytes()
+                if target in out and out[target] != data:
+                    raise GenerationError("%s: two sources write %s" % (where, target.relative_to(ROOT).as_posix()))
+                out[target] = data
+                continue
             for lang in LANGS:
                 target = ROOT / kind / lang / target_of(rel, lang, paths)
                 if f.suffix == ".typ":

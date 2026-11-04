@@ -6,6 +6,8 @@
 |---|---|
 | `woodwork/woodwork.typ` | The one file a sheet imports: `#import "/woodwork/woodwork.typ": *`. It re-exports the commands. |
 | `woodwork/lib/` | The engine, taken from Woodcore's `lib/` and cut to what a sheet needs: `formula.typ` (`#domain`, `#var`, `#eq`, `#verify`, `#unit`, `#calc-defaults`), `calc-engine*.typ` (the registry, numbers, display), `i18n.typ` and `strings.json` (the engine's words), `units.json`, `display-presets.json`, `material.typ` (`#material`). |
+| `woodwork/forms/` | The templates of form (decisions D-17): `neutral.typ`, `compact.typ`, `bfh.typ` (and the BFH's logo), each a function of its name -- `#import "/woodwork/forms/bfh.typ": bfh` then `#show: bfh` -- setting fonts, colours, sizes, spacing, headings, margins, header and footer, and no title page. |
+| `templates/fr/`, `templates/de/`, `templates/en/` | The templates of content, generated: the title pages (`titre-bfh.typ`, `titre-neutre.typ`; `titel-bfh`, `titel-neutral`; `title-bfh`, `title-neutral`), their fields written at their top, and the three documents as skeletons (`convention-d-utilisation/`, `base-de-projet/`, `rapport-de-statique/` and their German and English names), an entry file and its `Sections/`. |
 | `woodwork/figures/` | The sketches the detailed sheets show (`image("/woodwork/figures/tension-parallel.svg")`): copied with the engine, so a sheet finds them. |
 | `woodwork/data/` | The norm tables, one folder per norm, each file named by its table or clause without the norm and edition (`sia265/tab09-brettschichtholz.json`): today `sia265/`, `sia265-1/`, `sia260/`, `sn-en-14592/` (phase 1; SIA 261, SIA 263 and SZS C5 come with the phases that need them). `norms.json` (the documents a sheet may cite, for the bibliography), `presets.json` (named display presets), `my-materials/` (the office's own materials), `imported.json` (where each table was copied from). |
 | `sheets/fr/`, `sheets/de/`, `sheets/en/` | The calculation sheets, generated. Each tree has its folders and file names in its language (`sections-bois/traction/traction-axe.typ`, `holzquerschnitte/zug/zug-parallel.typ`, `timber-sections/tension/tension-parallel.typ`), a standard and a detailed sheet per check. |
@@ -18,7 +20,7 @@
 | `source/parts/` | The lines a standard and a detailed sheet share, inserted into both by `// @insert <name>` when they are generated -- never generated on their own. |
 | `source/labels.json` | Each label key in fr, de and en, and the translated names of folders and files. |
 | `examples/` | Documents that compile every sheet: the test of the whole. |
-| `tools/` | `generate.py` (source → sheets), `import_norms.py` (the one-time copy of Woodcore's tables, kept to show where each came from). |
+| `tools/` | `generate.py` (source → sheets and templates; a source file `name.fr.typ` goes to the French tree alone, as written), `import_documents.py` (the one-time conversion of Woodcore's three documents into skeletons), `import_norms.py` (the one-time copy of Woodcore's tables, kept to show where each came from). |
 | `tests/` | `run_tests.py`, `conftest.py`, `test_*.py`. |
 | `docs/` | This documentation and the specifications. |
 | `.claude/` | The skills and agents that develop Woodwork. |

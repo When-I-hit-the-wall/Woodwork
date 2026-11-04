@@ -78,4 +78,5 @@ def pdf_text(pdf):
         from pypdf import PdfReader
     except ImportError:
         raise Skip("pypdf is not installed")
-    return "\n".join(page.extract_text() or "" for page in PdfReader(str(pdf)).pages)
+    # Typst sets a no-break space between a word and its number («Fig. 1», «Abbildung 1»): read as a space
+    return "\n".join(page.extract_text() or "" for page in PdfReader(str(pdf)).pages).replace("\xa0", " ")
