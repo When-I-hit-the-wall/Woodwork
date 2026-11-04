@@ -32,12 +32,11 @@ def test_the_engine_reads_nothing_outside_woodwork():
         for n, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
             if line.lstrip().startswith("//"):
                 continue
-            for m in re.finditer(r'\b(json|read)\("([^"]*)"', line):
-                target = (f.parent / m.group(2)).resolve()
+            # every relative path the engine writes, whether read at once or kept in a constant: it resolves inside woodwork/
+            for m in re.finditer(r'"(\.\./[^"]*|[\w-]+\.json)"', line):
+                target = (f.parent / m.group(1)).resolve()
                 if ENGINE.resolve() not in target.parents:
                     found.append("%s:%d %s" % (f.name, n, m.group(0)))
-            if "../data/" in line and "bib-dir" not in line and "presets.json" not in line and "../data/\" +" not in line:
-                found.append("%s:%d %s" % (f.name, n, line.strip()[:80]))
     assert not found, found
 
 
