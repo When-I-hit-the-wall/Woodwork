@@ -1,0 +1,6 @@
+# Every text file is LF, on every machine: the generated sheets are compared byte for byte with what generate.py writes.
+* text=auto eol=lf
+*.pdf   binary
+*.png   binary
+*.jpg   binary
+*.svg   text eol=lf
