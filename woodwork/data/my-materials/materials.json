@@ -1,0 +1,4 @@
+{
+  "_note": "The office's own materials, read by #material when SIA 265 Tabelle 8 and 9 do not give the class. Each entry: `id` (what #material is given), `_source` (the document and page its values are read from -- an ETA, a manufacturer's table), `norm` and `norm_ref` (what a line cites), and its design values in N/mm² under the keys of Tabelle 8 and 9: f_m_d, f_t_0_d, f_c_0_d, f_t_90_d, f_c_90_d, f_v_d (multiplied by eta_w and eta_t like a class of SIA 265), and f_m_k, E_m_mean, E_0_mean, E_90_mean, G_mean, rho_k (published as written). Empty as shipped: Woodwork writes no value it has not read.",
+  "materials": []
+}

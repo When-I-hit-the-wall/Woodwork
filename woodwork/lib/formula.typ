@@ -1112,8 +1112,8 @@
   let record = if record.at("norm", default: none) == none and record.at("norm_ref", default: "") not in ("", none) and s.at("norm", default: none) != none { record + (norm: s.norm) } else { record }
   let norm = record.at("norm", default: none)
   let before = if s.at("label-position") == "before" and label != none { [#render-prose(tl-str(label))#colon-str()#h(0.35em)] } else { none }
-  // `left`: the label in a column of its own, the line beside it (`label-column`)
-  let column = if s.at("label-position") == "left" and label != none { render-prose(tl-str(label)) } else { none }
+  // `left`: the label in a column of its own, the line beside it (`label-column`); a line without a label keeps the column, empty, so every line of a domain starts at one indent (Woodwork's default puts every line there)
+  let column = if s.at("label-position") == "left" { if label != none { render-prose(tl-str(label)) } else { [] } } else { none }
   let after = ()
   if s.at("label-position") == "after" and label != none { after.push([ --- #render-prose(tl-str(label))]) }
   if s.at("descr-position") == "after" and descr != none { after.push([ (#render-prose(tl-str(descr)))]) }

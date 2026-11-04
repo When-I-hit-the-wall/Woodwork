@@ -87,7 +87,17 @@
       "de": "veraltet: {value} im Export",
       "fr": "périmé : {value} dans l’export",
       "en": "stale: {value} in the export"
+    },
+    "material.moisture_class": {
+      "de": "Feuchteklasse {n}",
+      "fr": "Classe d’humidité {n}",
+      "en": "Moisture class {n}"
     }
   },
-  "terms": {}
+  "terms": {
+    "Wert des Ingenieurs": {
+      "fr": "valeur de l’ingénieur",
+      "en": "engineer’s value"
+    }
+  }
 }

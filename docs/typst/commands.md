@@ -56,6 +56,20 @@ Without anything written, a line prints its label in a column at the left, then 
 
 A key prints as a symbol: the part before the first `_` is the letter, a Greek name being its letter (`sigma` σ); every part after it is an index, separated by commas — `N_t_d` N<sub>t,d</sub>, `sigma_t_0_d` σ<sub>t,0,d</sub>, `f_t_alpha_d` f<sub>t,α,d</sub>. An index that is a word is upright: `E_0_mean` E<sub>0,mean</sub>, `k_dens` k<sub>dens</sub>.
 
-## `#material`
+## `#material` — a strength class and its design values
 
-Reads a strength class from `woodwork/data/` and publishes its design values as variables (founding spec REQ-009; plan step 6).
+```typ
+#domain("tension", norm: "SIA 265")[
+  #material("GL24h",
+	moisture: 2,
+	print: ("f_t_0_d",))
+  …
+]
+```
+
+- Reads the class in SIA 265 Tabelle 8 (solid timber) or 9 (glulam), in `woodwork/data/sia265/`, else in the office's `woodwork/data/my-materials/materials.json` (a list under `materials`: `id`, `_source`, `norm`, `norm_ref` and the values under the keys of the tables). An unknown class stops the compile, naming both places and the classes they hold.
+- Publishes, as variables of the domain: `eta_w` (Tabelle 4, its resistance column, for `moisture:` 1, 2 or 3), `eta_t` (2.2.6: 1.0, or 1.4 with `impact: true`), each design strength `f_m_d`, `f_t_0_d`, `f_c_0_d`, `f_t_90_d`, `f_c_90_d`, `f_v_d` as η<sub>w</sub> · η<sub>t</sub> · the table's value (the table's own as `<key>_tab`), and `f_m_k`, `E_m_mean`, `E_0_mean`, `E_90_mean`, `G_mean`, `rho_k` as the table gives them. SIA 265 Tabelle 8 and 9 give design values: nothing is divided by γ<sub>M</sub> (Woodcore's rule, `Strengths._grade`).
+- `case:` the case of f<sub>c,90,d</sub> — `"generell"` (default), `"mit_vorholz"`, `"endauflagerung"`; `larger: true` the bracketed value.
+- `f_t_0_d: 11.0` (any key above): a value of the engineer's own, replacing the table's, labelled so.
+- `suffix: "1"`: every key suffixed (`f_c_90_d_1`, `eta_w_1`), for two materials in one domain. (`as`, the name first planned, is a word of Typst and cannot name an argument.)
+- Prints nothing unless asked: `print: ("f_t_0_d",)` prints η<sub>w</sub>, η<sub>t</sub>, the table's value and the calculation of each key listed, cited.
