@@ -53,7 +53,8 @@ def test_the_bfh_form_sets_a_table_its_title_above_and_its_legend_below():
     # spec 2026-11-05-style-tableaux-bfh: title above, centred; the totals of table.footer; the legend under the table
     ok, _, err, pdf = compile_typ('#import "/woodwork/forms/bfh.typ": bfh\n#show: bfh.with(lang: "de")\n= Kapitel\n' + BFH_TABLE)
     assert ok, err
-    t = pdf_text(pdf)
+    # pypdf reads a space after the no-break space of a bold caption, though the page shows one: collapse them
+    t = " ".join(pdf_text(pdf).split())
     assert t.index("Tabelle 1") < t.index("Typ") < t.index("Total Eigengewicht") < t.index("Legende"), t
     # the other forms keep Typst's own figure: the caption under the table
     ok, _, err, pdf = compile_typ('#import "/woodwork/forms/neutral.typ": neutral\n#show: neutral.with(lang: "de")\n' + BFH_TABLE)
