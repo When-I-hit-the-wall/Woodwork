@@ -6,6 +6,9 @@ import sys
 
 from conftest import ENGINE, ROOT, Skip
 
+sys.path.insert(0, str(ROOT / "tools"))
+from import_norms import QUOTES  # noqa: E402
+
 DATA = ENGINE / "data"
 IMPORTED = json.loads((DATA / "imported.json").read_text(encoding="utf-8"))
 OWN = {"imported.json", "presets.json"}
@@ -33,6 +36,8 @@ def test_no_note_sends_the_reader_to_woodcore():
 
 def test_no_excerpt_of_a_norm_is_copied():
     assert not list(DATA.rglob("*excerpts*")), list(DATA.rglob("*excerpts*"))
+    for p in tables():
+        assert not any(key in json.loads(p.read_text(encoding="utf-8")) for key in QUOTES), p.name
 
 
 def strip_notes(node):
@@ -52,7 +57,7 @@ def test_the_values_are_woodcores():
         if not src.exists():
             continue
         mine = strip_notes(json.loads((DATA / rel).read_text(encoding="utf-8")))
-        theirs = strip_notes(json.loads(src.read_text(encoding="utf-8")))
+        theirs = {k: v for k, v in strip_notes(json.loads(src.read_text(encoding="utf-8"))).items() if k not in QUOTES}
         assert mine == theirs, rel
 
 

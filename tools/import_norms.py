@@ -2,7 +2,7 @@
 
     python tools/import_norms.py <path of Woodcore>
 
-Copies the tables of the norms listed in NORMS from Woodcore's calc/norms/, each into the folder of its norm, its name without the norm and the edition (`sia265-2021-tab09-brettschichtholz.json` → `sia265/tab09-brettschichtholz.json`; the edition stays in the file, `edition` and `_source`). The excerpts (`*-excerpts.json`), which quote the text of clauses, are not copied (CON-007). Every file is rewritten **textually**: its values, `_source`, titles and labels stay byte for byte; only a `_note` that sends the reader to Woodcore's code or docs loses the sentence or the parenthesis that does. It writes `woodwork/data/imported.json`: each copied file, the Woodcore file it came from, and Woodcore's commit.
+Copies the tables of the norms listed in NORMS from Woodcore's calc/norms/, each into the folder of its norm, its name without the norm and the edition (`sia265-2021-tab09-brettschichtholz.json` → `sia265/tab09-brettschichtholz.json`; the edition stays in the file, `edition` and `_source`). The excerpts (`*-excerpts.json`, and the `excerpts` and `editions` of a clause file), which quote the text of clauses, are not copied (CON-007). Every file is rewritten **textually**: its values, `_source`, titles and labels stay byte for byte; only a `_note` that sends the reader to Woodcore's code or docs loses the sentence or the parenthesis that does. It writes `woodwork/data/imported.json`: each copied file, the Woodcore file it came from, and Woodcore's commit.
 """
 
 import json
@@ -14,13 +14,18 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "woodwork" / "data"
 
-# The norms of phase 1 (timber sections and stability): the prefix of their files in Woodcore, and the folder they go to.
+# The norms of phase 1 (timber sections and stability) and of the actions: the prefix of their files in Woodcore, and the folder they go to.
 NORMS = {
     "sia265-2021-": "sia265",
     "sia265-1-2018-": "sia265-1",
     "sia260-2013-": "sia260",
     "sn-en-14592-2022-": "sn-en-14592",
+    # the actions (snow, wind, dead loads), read by tools/build_actions.py into the workbooks of actions/
+    "sia261-2020-": "sia261",
 }
+
+# Files of those norms that are no table: the drawing of Annexe C's buildings in 3D, which Woodcore's window alone reads
+SKIPPED = ("sia261-2020-annexc-wind-geometry.json",)
 
 # What a note may not send the reader to: Woodcore's code, docs, specs and window.
 WOODCORE = re.compile(r"docs/|calc/|lib/|tests/|norm-library|spec 20\d\d-|Woodcore|woodcore|\b\w+\.py\b|Ctrl\+click|\bUI-\d+|\bREQ-\d+|snow tab")
@@ -52,8 +57,15 @@ def literal(s):
     return json.dumps(s, ensure_ascii=False)
 
 
+# The keys of a clause file that quote the norm's text, word for word, and name the pages of the PDF it is cut from (SIA 261 5.2): not copied (CON-007)
+QUOTES = ("excerpts", "editions")
+
+
 def copy(src, dst):
     text = src.read_text(encoding="utf-8")
+    data = json.loads(text)
+    if any(key in data for key in QUOTES):
+        text = json.dumps({k: v for k, v in data.items() if k not in QUOTES}, ensure_ascii=False, indent=2) + "\n"
     for note in notes(json.loads(text), []):
         if not WOODCORE.search(note):
             continue
@@ -72,7 +84,7 @@ def main():
     commit = subprocess.run(["git", "-C", str(woodcore), "log", "-1", "--format=%H %cs", "--", "calc/norms"], capture_output=True, text=True).stdout.strip()
     imported = {}
     for src in sorted(norms.glob("*.json")):
-        if src.name.endswith("-excerpts.json"):
+        if src.name.endswith("-excerpts.json") or src.name in SKIPPED:
             continue
         if src.name == "norms.json":
             dst = DATA / "norms.json"
