@@ -102,6 +102,26 @@ A **title page** is a content template: `templates/<lang>/titre-bfh.typ` (or `ti
 
 The three **documents** -- convention d'utilisation, base de projet, rapport de statique -- are skeletons in `templates/<lang>/`: an entry file that sets the form and includes the title page and the sections, and `Sections/` with Woodcore's headings, prose and tables to fill; where Woodcore printed its export, a comment says what to paste.
 
+### Tables in the form `bfh`
+
+In a document set in the form `bfh`, a table written straight into a figure takes the BFH table style (spec 2026-11-05-style-tableaux-bfh): its title above it, centred, larger than its cells; the header in the BFH grey-blue, white and bold; the body's rows striped; the rows of a `table.footer` set as totals -- bold, after a rule, a yellow mark on their first cell; no hyphenation in a cell. Whatever the figure holds after the table -- a note, a legend -- stands under it, small and to the left, and stays with it across a page break. Nothing to call: the form does it. A table the engine lays out itself (`var-table`, a check's table) keeps its own look, and so do the forms `neutral` and `compact`.
+
+```typst
+#figure(caption: [Schichtaufbau Dach – ständige Lasten], {
+  table(
+    columns: (auto, 1fr, auto, auto, auto, auto, auto),
+    align: (left, left, right, right, right, right, right),
+    table.header([Typ], [Schicht], [Dicke \ \[mm\]], [Breite \ \[mm\]], [Abstand \ \[mm\]], [Gewicht], [Last \ \[kN/m²\]]),
+    [$a_k$], [Latte C24], [40], [60], [2160], [5 kN/m³], [0.006],
+    [$g_k$], [Brettschichtholz GL24h], [640], [220], [2000], [5 kN/m³], [0.352],
+    table.footer(
+      [$g_k$], table.cell(colspan: 5)[Total Eigengewicht], [0.352],
+    ),
+  )
+  [$g_k$ Eigengewicht, $a_k$ Auflast. Last je Schicht = Wichte · Dicke · Breite / Abstand.]
+})
+```
+
 ## `#show-norm-list`
 
 `#show-norm-list(keys: ("SIA 260", "SIA 261", "SIA 265"))` lists the documents named, in full -- designation, title, publisher and edition -- as `woodwork/data/norms.json` gives them, and cites each for the bibliography. A key may be content of one's own, `[Lärmschutz-Verordnung (LSV)]`. Taken from Woodcore's `lib/document.typ`.

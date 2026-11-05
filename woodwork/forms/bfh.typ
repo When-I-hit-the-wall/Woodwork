@@ -50,6 +50,51 @@
   )
 }
 
+// --- Tables -----------------------------------------------------------------
+// The BFH table, «Schiefer-Kopf» (spec 2026-11-05-style-tableaux-bfh): a table written straight into a figure, `#figure(table(..), caption: [..])`, takes it -- its title above, centred, larger than the header; the header in the grey-blue, its text white and bold; the body's rows striped in a light grey; the rows of a `table.footer` are totals, set in bold after a grey-blue rule, a yellow mark on their first cell; a closing rule; no hyphenation in a cell. What the figure holds after the table -- a note, a legend -- stands under it, small and to the left. A table the engine lays out itself (`var-table`, a check's table) sits in a block of its figure, not straight in it, and keeps its own look.
+#let bfh-mist = rgb("#EEF1F4")  // the light grey of the striped rows
+
+// The number of columns a table's `columns` names: a count, or one track each.
+#let _column-count(columns) = if type(columns) == array { columns.len() } else if type(columns) == int { columns } else { 1 }
+
+// How many grid cells a child of a table takes: a cell its colspan, a line none, any other content one.
+#let _span(child) = if child.func() == table.cell { child.at("colspan", default: 1) } else if child.func() in (table.hline, table.vline) { 0 } else { 1 }
+
+// One table in the BFH style. It is laid out again with its own cells, so the rows of its header and its body can be counted; the label it then carries says it is done, so the rule does not take it twice.
+#let bfh-table(it) = {
+  if it.at("label", default: none) == <bfh-table-done> { return it }
+  let fields = it.fields()
+  let children = fields.remove("children")
+  for key in ("label", "fill") { let _ = fields.remove(key, default: none) }
+  let ncols = _column-count(fields.at("columns", default: 1))
+  let header = children.filter(c => c.func() == table.header)
+  let footer = children.filter(c => c.func() == table.footer)
+  let body = children.filter(c => c.func() not in (table.header, table.footer))
+  let header-rows = header.map(h => calc.ceil(h.children.map(_span).sum(default: 0) / ncols)).sum(default: 0)
+  let body-rows = calc.ceil(body.map(_span).sum(default: 0) / ncols)
+  // The totals: every cell bold, the first of each row with the yellow mark.
+  let totals = ()
+  let column = 0
+  for c in footer.map(f => f.children).flatten() {
+    let span = _span(c)
+    if span == 0 { totals.push(c); continue }
+    let args = if c.func() == table.cell { c.fields() } else { (body: c) }
+    let inner = args.remove("body")
+    if calc.rem(column, ncols) == 0 { args.insert("stroke", (left: 3pt + bfh-yellow)) }
+    totals.push(table.cell(..args, strong(inner)))
+    column += span
+  }
+  let closing = table.hline(stroke: 1.2pt + bfh-grey)
+  show table.cell: cell => if cell.y < header-rows { set text(fill: white, weight: "bold"); cell } else { cell }
+  [#table(
+    ..fields,
+    fill: (x, y) => if y < header-rows { bfh-grey } else if y < header-rows + body-rows and calc.odd(y - header-rows) { bfh-mist } else { none },
+    ..header,
+    ..body,
+    ..if totals.len() > 0 { (table.footer(repeat: false, table.hline(stroke: 0.8pt + bfh-grey), ..totals, closing),) } else { (closing,) },
+  )<bfh-table-done>]
+}
+
 /// The look of a document: `#show: bfh`, or `#show: bfh.with(lang: "fr")`.
 /// - doc (content): the document.
 /// - lang (str, none): none keeps the document's language; else the language Typst itself works in -- the hyphenation patterns, the quotation marks, the words it writes of its own accord («Abbildung»/«Fig.», the outline's title).
@@ -101,6 +146,22 @@
 
   // Captions -- of a figure and of a table: «Fig. 1 — …», a little smaller than the text.
   show figure.caption: set text(size: 9pt)
+
+  // Tables (spec 2026-11-05-style-tableaux-bfh): a table written straight into a figure takes the BFH style -- see `bfh-table` above. Its title above it, centred, a little larger than the text of its cells.
+  show figure.where(kind: table): set figure.caption(position: top)
+  show figure.where(kind: table): it => {
+    let parts = if it.body.func() == table { (it.body,) } else if it.body.has("children") { it.body.children } else { () }
+    if not parts.any(c => c.func() == table) { return it }
+    set align(left)
+    set text(size: 8pt, fill: muted)
+    set par(justify: false)
+    show figure.caption: c => block(width: 100%, align(center, c))
+    show figure.caption: set text(size: 10.5pt, weight: "bold", fill: black)
+    show table: set text(size: 9pt, fill: black, hyphenate: false)
+    set table(stroke: none, inset: (x: 5pt, y: 4pt))
+    show table: t => block(width: 100%, align(center, bfh-table(t)))
+    it
+  }
 
   // The formulas keep Typst's math font.
   show math.equation: set text(font: "New Computer Modern Math")

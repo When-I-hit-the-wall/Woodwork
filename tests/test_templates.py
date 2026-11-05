@@ -38,6 +38,30 @@ def test_the_bfh_form_sets_its_header_and_footer():
     assert "Berner Fachhochschule | Haute école spécialisée bernoise | Bern University of Applied Sciences" in pdf_text(pdf).replace("  ", " "), pdf_text(pdf)
 
 
+BFH_TABLE = """#figure(caption: [Schichtaufbau Dach], {
+  table(columns: (auto, 1fr, auto),
+    table.header([Typ], [Schicht], [Last]),
+    [$a_k$], [Latte C24], [0.006],
+    [$g_k$], [Brettschichtholz GL24h], [0.352],
+    table.footer([$g_k$], [Total Eigengewicht], [0.352]))
+  [Legende unter der Tabelle.]
+})
+"""
+
+
+def test_the_bfh_form_sets_a_table_its_title_above_and_its_legend_below():
+    # spec 2026-11-05-style-tableaux-bfh: title above, centred; the totals of table.footer; the legend under the table
+    ok, _, err, pdf = compile_typ('#import "/woodwork/forms/bfh.typ": bfh\n#show: bfh.with(lang: "de")\n= Kapitel\n' + BFH_TABLE)
+    assert ok, err
+    t = pdf_text(pdf)
+    assert t.index("Tabelle 1") < t.index("Typ") < t.index("Total Eigengewicht") < t.index("Legende"), t
+    # the other forms keep Typst's own figure: the caption under the table
+    ok, _, err, pdf = compile_typ('#import "/woodwork/forms/neutral.typ": neutral\n#show: neutral.with(lang: "de")\n' + BFH_TABLE)
+    assert ok, err
+    t = pdf_text(pdf)
+    assert t.index("Typ") < t.index("Tabelle 1"), t
+
+
 def generated(lang):
     return {p.relative_to(ROOT / "templates" / lang).as_posix(): p.read_text(encoding="utf-8") for p in (ROOT / "templates" / lang).rglob("*.typ")}
 
