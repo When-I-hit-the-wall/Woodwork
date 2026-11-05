@@ -2,7 +2,9 @@
 
     python tools/check_actions.py <path of Woodcore>
 
-Needs openpyxl, LibreOffice (`soffice` on the PATH) and Woodcore beside it (calc/domains/snow_source.py, wind_forces.py, dead_load_source.py): a maintainer's check, run after tools/build_actions.py, never by a sheet's user. Prints each case that differs, and exits 1 if one does.
+Then each recalculated case is exported to Typst by tools/actions_typ.py, and the values Typst computes in the calculation file (read back with `typst query`) are compared with the workbook's: the .typ computes what the sheet computes.
+
+Needs openpyxl, LibreOffice (`soffice` on the PATH), the `typst` Python package (`pip install typst`) and Woodcore beside it (calc/domains/snow_source.py, wind_forces.py, dead_load_source.py): a maintainer's check, run after tools/build_actions.py, never by a sheet's user. Prints each case that differs, and exits 1 if one does.
 """
 
 import itertools
@@ -77,7 +79,7 @@ def wind_cases():
 
 def wind_inputs(src):
     return {"q_p0": src["q_p0"], "categorie": src["terrain"], "b": src["b"], "d": src["d"], "h": src["h"], "z_saisi": src["z"], "c_d": src["c_d"],
-            "tableau": src["table"], "ouvertures": OPENING_WORDS[src["openings"]]}
+            "ouvertures": OPENING_WORDS[src["openings"]]}
 
 
 def wind_expected(src):
@@ -119,6 +121,23 @@ def recalc(paths, outdir, chunk=25):
         sys.exit("LibreOffice did not recalculate %s" % ", ".join(missing))
 
 
+def typst_values(case_path, sheet, outdir):
+    """Exports one case and has Typst compute it: {key: (Typst's value, the workbook's)}."""
+    import json
+    import typst
+    sys.path.insert(0, str(ROOT / "tools"))
+    import actions_typ
+    written, info = actions_typ.export(case_path, sheet, outdir, levels=())
+    calc = written[0]
+    fn = calc.name[:-len("-calcul.typ")]
+    keys = list(info["check"])
+    probe = outdir / (fn + "-probe.typ")
+    probe.write_text('#import "/woodwork/woodwork.typ": *\n#import "%s": %s\n#%s()\n#context [#metadata((%s)) <probe>]\n' % (
+        calc.name, fn, fn, ", ".join('"%s": get("%s", "value", domain: "%s")' % (k, k, fn) for k in keys)), encoding="utf-8")
+    got = json.loads(typst.query(str(probe), "<probe>", field="value", one=True, root=str(ROOT)))
+    return {k: (got[k], info["check"][k]) for k in keys}
+
+
 def same(a, b):
     if isinstance(a, (int, float)) and isinstance(b, (int, float)):
         return abs(a - b) <= TOL * max(1.0, abs(b))
@@ -130,13 +149,15 @@ def main():
     sys.path.insert(0, str(woodcore / "calc"))
     tmp = Path(tempfile.mkdtemp(prefix="woodwork-actions-"))
     jobs = []   # (file, sheet, expected, label)
-    for book, sheet, cases, inputs, expected in (("neige.xlsx", "Neige", snow_cases(), snow_inputs, snow_expected),
-                                                  ("vent.xlsx", "Vent", wind_cases(), wind_inputs, wind_expected)):
+    for book, sheet_of, cases, inputs, expected in (("neige.xlsx", lambda src: "Neige", snow_cases(), snow_inputs, snow_expected),
+                                                     ("vent.xlsx", lambda src: "Tableau " + src["table"], wind_cases(), wind_inputs, wind_expected)):
         for i, src in enumerate(cases):
             wb = load_workbook(BOOKS / book)
+            sheet = sheet_of(src)
             ws = wb[sheet]
             for name, value in inputs(src).items():
-                ws[named(ws, name)] = value
+                if name in ws.defined_names:   # a table without openings has no «ouvertures»
+                    ws[named(ws, name)] = value
             path = tmp / ("%s-%03d.xlsx" % (book[:-5], i))
             wb.save(path)
             jobs.append((path, sheet, expected(src), "%s %d %s" % (book, i, {k: v for k, v in src.items() if k not in ("schema_version", "id", "name", "label", "group")})))
@@ -164,6 +185,26 @@ def main():
                 failures += 1
                 print("DIFFERS %s: %s = %r, Woodcore %r" % (sheet, name, got, value))
     print("%d cases of snow and wind, %d build-ups: %s" % (len(jobs), len(sheets), "%d values differ" % failures if failures else "every value is Woodcore's"))
+    # the export to Typst: every case computed again by Typst, from the .typ the export writes
+    typ = tmp / "typ"
+    typ.mkdir(parents=True, exist_ok=True)
+    checked, typ_failures = 0, 0
+    cases = [(out / path.name, sheet, label) for path, sheet, _e, label in jobs] + [(out / dead.name, s, s) for s in sheets]
+    for path, sheet, label in cases:
+        try:
+            values = typst_values(path, sheet, typ / ("c%d" % checked))
+        except Exception as e:   # an export or a compile that fails is a failure of the check, said with its case
+            typ_failures += 1
+            print("TYPST %s: %s" % (label, e))
+            checked += 1
+            continue
+        checked += 1
+        for key, (got, want) in values.items():
+            if not (isinstance(got, (int, float)) and abs(got - want) <= 1e-9 * max(1.0, abs(want))):
+                typ_failures += 1
+                print("TYPST DIFFERS %s: %s = %r, workbook %r" % (label, key, got, want))
+    print("%d cases exported to Typst: %s" % (checked, "%d values differ" % typ_failures if typ_failures else "Typst computes every value the workbook does"))
+    failures += typ_failures
     shutil.rmtree(tmp, ignore_errors=True)
     sys.exit(1 if failures else 0)
 

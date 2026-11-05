@@ -53,5 +53,8 @@ The engineer, 5 November 2026: «je préfère cette manière d'écrire : 28'000 
 ## D-21 — `suffix:` and `titre-neutre`, confirmed
 `#material(…, suffix: "1")` (Typst refuses `as` as an argument's name) and the French title page `titre-neutre` (the engineer wrote «titre-neutral»): both confirmed by the engineer on 5 November 2026.
 
+## D-22 — The actions export to Typst through a Python window
+The engineer, 5 November 2026, chose the option A of the proposals (a small Python window reading the workbook) over an Excel button (VBA, a `.xlsm`) and over a Typst command reading an exported JSON: «il faut qu'elles soient déclarées avec la commande VAR et calculées avec la commande EQ», the values in a file of their own that computes without printing, imported by the file that presents them. `tools/actions_typ.py` is therefore the one Python a user runs; what it writes needs Typst alone. Cost: openpyxl on the engineer's machine, and a workbook saved by Excel before each export.
+
 ## Licence — GPL-3.0
 Woodwork's engine derives from Woodcore, which is GPL-3.0.

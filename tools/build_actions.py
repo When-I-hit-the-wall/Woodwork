@@ -447,10 +447,6 @@ def build_snow():
 WIND_TABLES = tuple(str(n) for n in range(31, 57)) + ("57a", "57b", "57c", "57d", "58", "59a", "59b", "60a", "60b", "63", "64")
 OPENINGS = [("rep", "ouvertures réparties"), ("A", "ouverture dominante dans la paroi A"), ("B", "ouverture dominante dans la paroi B"),
             ("C", "ouverture dominante dans la paroi C"), ("D", "ouverture dominante dans la paroi D")]
-MAX_COLS = 37      # the widest table of Annexe C (60a)
-MAX_ROWS = 6       # the longest (63)
-BLOCK = 27         # rows of a table's block in «Annexe C»: title, 7 rows of what each column is, 6 shown, 6 larger, 6 smaller, one blank
-META = {"label": 1, "group": 2, "surface": 3, "area": 4, "factor": 5, "own_cpi": 6, "direct": 7}
 DIRECTION = re.compile(r"^([−-]?\d+(?:\.\d+)?)°$")
 
 
@@ -505,22 +501,12 @@ def surface_kind(column):
     return "paroi" if re.match(r"^[ABCD]\d*$", column["surface"]) else "toit"
 
 
-def build_wind():
-    clause = norm("6.2-wind")["clause"]
-    tables = [wind_table(n) for n in WIND_TABLES]
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Vent"
+def wind_common(wb, clause):
+    """«Données SIA 261» (Tableau 4, (12), c_d, the scope) and «Figure 9» (c_red on a grid of 5 m), which every table's sheet reads."""
+    q = quoted
     d = data_sheet(wb, "Données SIA 261")
-    ac = wb.create_sheet("Annexe C")
-    ac.sheet_view.showGridLines = False
-    ix = wb.create_sheet("Tableaux")
-    ix.sheet_view.showGridLines = False
     f9 = wb.create_sheet("Figure 9")
     f9.sheet_view.showGridLines = False
-    q = quoted
-
-    # --- «Données SIA 261»: Tableau 4, (12), c_d, scope
     put(d, 1, 1, "Valeurs de SIA 261:2020, chapitre 6 « Vent »", F_TITLE)
     put(d, 2, 1, "Lues dans woodwork/data/sia261/6.2-wind.json.", F_SUB)
     put(d, 4, 1, "Tableau 4 : catégories de terrain", F_HEAD)
@@ -539,7 +525,7 @@ def build_wind():
                ("cd_default", "c_d usuel (6.3.5)", clause["c_d"]["default"]), ("cd_height", "Hauteur au-delà de laquelle c_d = 1,0 ne vaut que pour les bâtiments que 6.3.5 nomme [m]", clause["c_d"]["building_height"]),
                ("max_height", "Hauteur maximale (6.1.2) [m]", clause["scope"]["max_height"]), ("cred_roof", "c_red du toit et des autres surfaces (6.3.2)", clause["c_red"]["roof"]),
                ("ratio_spread", "Écart des proportions signalé au-delà de (règle de Woodcore, pas de la norme)", 1.5)]
-    refs = {}
+    refs = {"terr": terr}
     r = 11
     put(d, r, 1, "Autres valeurs", F_HEAD)
     r += 1
@@ -549,8 +535,7 @@ def build_wind():
         refs[key] = "%s!$B$%d" % (q(d.title), r)
         r += 1
     d.column_dimensions["A"].width = 70
-
-    # --- «Figure 9»: c_red by h and beta, beyond a curve's end its last value (sia261_wind.c_red)
+    # «Figure 9»: c_red by h and β, beyond a curve's end its last value (sia261_wind.c_red)
     curves = clause["c_red"]["curves"]
     heights = sorted({p[0] for cv in curves for p in cv["points"]})
     put(f9, 1, 1, "Figure 9 : coefficient de réduction c_red selon h [m] et β = b/h ou d/h", F_TITLE)
@@ -568,118 +553,79 @@ def build_wind():
         put(f9, 6 + i, 1, h, F_HEAD)
     assert heights == [5 + 5 * k for k in range(len(heights))], "Figure 9 is read on a grid of 5 m"
     nb, nh = len(curves), len(heights)
-    f9r = {"betas": "%s!$B$4:$%s$4" % (q(f9.title), col(1 + nb)), "hend": "%s!$B$5:$%s$5" % (q(f9.title), col(1 + nb)),
-           "grid": "%s!$B$6:$%s$%d" % (q(f9.title), col(1 + nb), 5 + nh)}
+    refs["f9"] = {"betas": "%s!$B$4:$%s$4" % (q(f9.title), col(1 + nb)), "hend": "%s!$B$5:$%s$5" % (q(f9.title), col(1 + nb)),
+                  "grid": "%s!$B$6:$%s$%d" % (q(f9.title), col(1 + nb), 5 + nh), "nb": nb, "nh": nh, "heights": heights}
     f9.column_dimensions["A"].width = 22
+    return refs
 
-    # --- «Annexe C»: a block per table; «Tableaux»: one line per table, what the sheet looks up
-    put(ac, 1, 1, "SIA 261:2020, annexe C : les coefficients des bâtiments, tableaux 31 à 60b, 63 et 64", F_TITLE)
-    put(ac, 2, 1, "Lus dans woodwork/data/sia261/tabNN-wind.json. Par tableau : ce qu'est chaque colonne, les valeurs telles qu'imprimées, la plus grande et la plus petite de chaque case (une paire ±x ou a/b compte ses deux valeurs, « * » est calculé directement par la norme).", F_SUB)
-    ac.column_dimensions["A"].width = 16
-    ac.column_dimensions["B"].width = 16
-    cpe_slots = max(sum(1 for c in t["columns"] if c["group"] in ("cpe", "cpe_local")) for t in tables)
-    cf_slots = max(sum(1 for c in t["columns"] if c["group"] in ("cf", "cf_snow")) for t in tables)
-    heads = ["Tableau", "Titre", "h : b : d", "Toit", "Ligne du bloc", "Lignes", "Colonnes", "h/d du tableau", "b/d du tableau", "Remarques", "Colonnes « * »", "Surfaces sans aire"] + \
-            ["c_pi %s" % k for k, _w in OPENINGS] + ["c_f n°%d" % (k + 1) for k in range(cf_slots)] + ["c_pe n°%d" % (k + 1) for k in range(cpe_slots)]
-    for j, h in enumerate(heads):
-        put(ix, 1, 1 + j, h, F_HEAD, fill=FILL_HEAD)
-    ix.column_dimensions["B"].width = 50
+
+VIEW_PX = (300, 231)   # an axonometric view as the sheet shows it, in pixels (the PNG is drawn at 1040 × 800)
+VIEWS = SOURCE / "wind-views"
+NORM_FIGURES = SOURCE / "norm-figures"   # the figures of the norm, cut locally from the engineer's own PDF (gitignored: CON-007)
+
+
+def picture(ws, path, anchor, width):
+    from openpyxl.drawing.image import Image as XLImage
+    img = XLImage(str(path))
+    ratio = img.height / img.width
+    img.width, img.height = width, int(width * ratio)
+    ws.add_image(img, anchor)
+    return img.height
+
+
+def wind_table_sheet(wb, t, clause, refs):
+    """One table of Annexe C on a sheet of its own: the building's figure and three axonometric views, the data, q_p, c_red, the table's coefficients and every direction's q_k, the largest and the smallest of each coefficient (wind_forces.global_forces and local_pressures)."""
+    number = t["number"]
+    ws = wb.create_sheet("Tableau " + number)
+    q = quoted
+    f9r, terr = refs["f9"], refs["terr"]
+    heights, nb, nh = f9r["heights"], f9r["nb"], f9r["nh"]
+    cols, rows = t["columns"], t["rows"]
+    n, nr = len(cols), len(rows)
+    index = {c["key"]: i for i, c in enumerate(cols)}
+    own = {c["surface"]: index[c["key"]] for c in cols if c["group"] == "cpi"}
+    openings = [c for c in cols if c["group"] == "cpi_opening"]
     areas = clause["forces"]["areas"]
-    start = 4
     rule = clause["c_red"]["directions"]
-    for k, t in enumerate(tables):
-        S = start + k * BLOCK
-        cols = t["columns"]
-        index = {c["key"]: i for i, c in enumerate(cols)}
-        own = {c["surface"]: index[c["key"]] for c in cols if c["group"] == "cpi"}
-        put(ac, S, 1, "Tableau " + t["number"], F_HEAD, fill=FILL_HEAD)
-        put(ac, S, 2, t["title"], F_HEAD)
-        for name, off in META.items():
-            put(ac, S + off, 1, name, F_REF)
-        for i, c in enumerate(cols):
-            j = 4 + i
-            net = c["surface"][:-2] if c.get("surface", "").endswith("_e") else c.get("surface", "")
-            put(ac, S + META["label"], j, column_words(c), F_HEAD)
-            put(ac, S + META["group"], j, c["group"])
-            put(ac, S + META["surface"], j, net if c["group"] in ("cpe", "cpe_local") else "")
-            put(ac, S + META["area"], j, c.get("area", "") or "")
-            put(ac, S + META["factor"], j, c.get("area_factor") or 1)
-            jj = own.get(c.get("surface"), own.get(net + "_i")) if c["group"] in ("cpe", "cpe_local") else None
-            put(ac, S + META["own_cpi"], j, 0 if jj is None else jj + 1)
-            put(ac, S + META["direct"], j, 1 if any(row["values"][i] == "direct" for row in t["rows"]) else 0)
-        for r_, row in enumerate(t["rows"]):
-            for block, off in (("shown", 8), ("hi", 14), ("lo", 20)):
-                put(ac, S + off + r_, 1, {"shown": "valeurs", "hi": "plus grande", "lo": "plus petite"}[block], F_REF)
-                put(ac, S + off + r_, 2, row["label"], F_HEAD if block == "shown" else F_DATA)
-                put(ac, S + off + r_, 3, 1 if oblique(row["label"], rule) else 0)
-                for i, v in enumerate(row["values"]):
-                    shown, hi, lo = cell_values(v)
-                    put(ac, S + off + r_, 4 + i, {"shown": shown, "hi": hi, "lo": lo}[block])
-        # the line of the index
-        rr = 2 + k
-        m = re.match(r"^\s*([\d,.]+)\s*:\s*([\d,.]+)\s*:\s*([\d,.]+)\s*$", t.get("ratio") or "")
-        hb = [float(x.replace(",", ".")) for x in m.groups()] if m else None
-        openings = [c for c in cols if c["group"] == "cpi_opening"]
-        chosen = [next((index[c["key"]] + 1 for c in openings if c["opening"] == key), index[openings[0]["key"]] + 1 if openings else 0) for key, _w in OPENINGS]
-        cfs = [i + 1 for i, c in enumerate(cols) if c["group"] in ("cf", "cf_snow")]
-        cpes = [i + 1 for i, c in enumerate(cols) if c["group"] in ("cpe", "cpe_local")]
-        direct = [column_words(c) for i, c in enumerate(cols) if c["group"] in ("cf", "cf_snow") and any(row["values"][i] == "direct" for row in t["rows"])]
-        no_area = sorted({column_words(c).split(" (")[1][:-1] for c in cols if c["group"] in ("cf", "cf_snow") and c["area"] not in areas})
-        values = [t["number"], t["title"], t.get("ratio") or "", t.get("roof") or "", S, len(t["rows"]), len(cols),
-                  hb[0] / hb[2] if hb else "", hb[1] / hb[2] if hb else "", " ; ".join(t.get("notes") or []), ", ".join(direct), ", ".join(no_area)] + \
-                 chosen + cfs + [0] * (cf_slots - len(cfs)) + cpes + [0] * (cpe_slots - len(cpes))
-        for j, v in enumerate(values):
-            put(ix, rr, 1 + j, v, fmt=NUM3 if j in (7, 8) and v != "" else None)
-    n = len(tables)
-    ixc = lambda j: "%s!$%s$2:$%s$%d" % (q(ix.title), col(j), col(j), 1 + n)
-    IX = {h: ixc(1 + j) for j, h in enumerate(heads)}
-    acr = "%s!$D$1:$%s$%d" % (q(ac.title), col(3 + MAX_COLS), start + n * BLOCK)
 
-    # --- the sheet
     sh = Sheet(ws)
-    sh.title("Action du vent — SIA 261:2020, chapitre 6 et annexe C",
-             ["Cellules jaunes : à saisir. Les valeurs de la norme sont dans les feuilles « Données SIA 261 », « Figure 9 », « Annexe C » et « Tableaux ».",
-              "Un cas par feuille : pour un autre bâtiment, copier la feuille. Le détail par direction du vent est à droite (colonnes H et suivantes)."])
+    sh.title("Vent, tableau %s de l'annexe C — %s" % (number, t["title"]),
+             ["SIA 261:2020, chapitre 6 et annexe C. Cellules jaunes : à saisir. Proportions du tableau h : b : d = %s%s." % (t.get("ratio") or "—", (", toit : " + t["roof"]) if t.get("roof") else ""),
+              "Un cas par feuille : pour un autre bâtiment, copier la feuille. À droite : le bâtiment, les coefficients du tableau et le détail par direction du vent."])
     sh.line("Désignation du cas", "", "Bâtiment", kind="input", name="designation")
     sh.skip()
     sh.section("1. Données de base")
     qp0 = sh.line("Pression dynamique de référence", "q_p0", 1.1, "kN/m²", "Annexe E", "Carte de l'annexe E : https://261.sia.ch/?lang=fr&layer=wind", "q_p0", "input", NUM2)
     cat = sh.line("Catégorie de terrain", "", "III", "", "Tableau 4", "II rive lacustre · IIa grande plaine · III localité, milieu rural · IV zone urbaine étendue", "categorie", "input",
-                  choices='"%s"' % ",".join(t["id"] for t in clause["terrain"]["categories"]))
+                  choices='"%s"' % ",".join(x["id"] for x in clause["terrain"]["categories"]))
     b = sh.line("Longueur du bâtiment", "b", 20, "m", "6.3, annexe C", "Dimension de la paroi A (face au vent à φ = 0°).", "b", "input", NUM2)
     dd = sh.line("Largeur du bâtiment", "d", 12, "m", "6.3, annexe C", "Dimension dans la direction du vent à φ = 0°.", "d", "input", NUM2)
     h = sh.line("Hauteur du bâtiment", "h", 8, "m", "6.3, annexe C", "", "h", "input", NUM2)
     z_in = sh.line("Hauteur de référence (vide : z = h)", "z", "", "m", "6.2.2.3", "Vide : la pression au point le plus haut, z = h.", "z_saisi", "input", NUM2)
     cd = sh.line("Coefficient dynamique", "c_d", 1.0, "", "6.3.5", "1,0 sauf si SIA 261/1 en donne un autre.", "c_d", "input", NUM2)
+    words = [w for _k, w in OPENINGS]
+    if openings:
+        op = sh.line("Ouvertures (coefficient de pression intérieure)", "", words[0], "", "Annexe C", "Le c_pi des colonnes « c_pi » du tableau.", "ouvertures", "input",
+                     choices='"%s"' % ",".join(words))
+        opn = sh.line("Ouvertures (numéro)", "", '=MATCH(%s,{"%s"},0)' % (op, '","'.join(words)), "", "", "", "ouvertures_n", fmt=NUM0)
+        chosen = [next((index[c["key"]] + 1 for c in openings if c["opening"] == key), index[openings[0]["key"]] + 1) for key, _w in OPENINGS]
+        opcol = sh.line("Colonne de c_pi retenue", "", "=CHOOSE(%s,%s)" % (opn, ",".join(str(x) for x in chosen)), "", "", "Le numéro de la colonne du tableau, à droite.", "cpi_colonne", fmt=NUM0)
+    else:
+        op = opn = None
+        opcol = "0"
     sh.skip()
-    sh.section("2. Bâtiment (annexe C)")
-    tab = sh.line("Tableau de l'annexe C", "", "33", "", "Annexe C", "Tableaux 31 à 60b, 63 et 64 (les bâtiments).", "tableau", "input", choices="=" + IX["Tableau"])
-    ws[tab].number_format = "@"
-    ti = sh.line("Ligne du tableau (index)", "", "=MATCH(%s&\"\",%s,0)" % (tab, IX["Tableau"]), "", "", "", "tableau_n", fmt=NUM0)
-    look = lambda h_: "INDEX(%s,%s)" % (IX[h_], ti)
-    sh.line("Titre", "", "=" + look("Titre"), "", "", "")
-    sh.line("Proportions du tableau h : b : d", "", "=" + look("h : b : d"), "", "", "")
-    sh.line("Proportions saisies h/d : b/d : 1", "", '=TEXT(%s/%s,"0.00")&" : "&TEXT(%s/%s,"0.00")&" : 1"' % (h, dd, b, dd), "", "", "")
-    sh.line("Toit", "", "=" + look("Toit"), "", "", "")
-    op = sh.line("Ouvertures (coefficient de pression intérieure)", "", OPENINGS[0][1], "", "Annexe C", "Pour les tableaux qui donnent c_pi selon les ouvertures (31-45, 58-60b). Les tableaux 46-56 prennent le c_pi de chaque surface, 57a-d, 63 et 64 aucun.",
-                 "ouvertures", "input", choices='"%s"' % ",".join(w for _k, w in OPENINGS))
-    opn = sh.line("Ouvertures (numéro)", "", '=MATCH(%s,{"%s"},0)' % (op, '","'.join(w for _k, w in OPENINGS)), "", "", "", "ouvertures_n", fmt=NUM0)
-    opcol = sh.line("Colonne de c_pi retenue", "", '=IFERROR(INDEX(%s,%s,MATCH("c_pi "&INDEX({"%s"},%s),%s,0)),0)' % (
-        "%s!$A$2:$%s$%d" % (q(ix.title), col(len(heads)), 1 + n), ti, '","'.join(k for k, _w in OPENINGS), opn, "%s!$A$1:$%s$1" % (q(ix.title), col(len(heads)))),
-        "", "", "0 : le c_pi propre de chaque surface, ou aucun", "cpi_colonne", fmt=NUM0)
-    S0 = sh.line("Première ligne du bloc", "", "=" + look("Ligne du bloc"), "", "", "", "bloc", fmt=NUM0)
-    nrows = sh.line("Nombre de directions", "", "=" + look("Lignes"), "", "", "", "directions", fmt=NUM0)
-    sh.skip()
-    sh.section("3. Pression dynamique")
+    sh.section("2. Pression dynamique")
     z = sh.line("Hauteur lue", "z", '=IF(ISNUMBER(%s),%s,%s)' % (z_in, z_in, h), "m", "6.2.2.3", "", "z_lu", fmt=NUM2)
     prof = sh.line("Profil lu", "", '=IF(AND(%s="IV",%s>%s),"III",%s)' % (cat, z, refs["iv_as_iii"], cat), "", "6.2.1.2", "La catégorie IV est lue sur le profil III au-dessus de 30 m.", "profil")
     zu = sh.line("Hauteur au-dessus du sol", "z", '=MAX(%s,IF(%s="IV",%s,%s))' % (z, cat, refs["z_min_IV"], refs["z_min"]), "m", "6.2.1.2", "Au moins 5 m (10 m en catégorie IV).", "z", fmt=NUM2)
-    zg = sh.line("Hauteur de gradient", "z_g", "=INDEX(%s,MATCH(%s,%s,0))" % (terr["zg"], prof, terr["ids"]), "m", "Tableau 4", "", "z_g", fmt=NUM0)
-    ar = sh.line("Rugosité du sol", "α_r", "=INDEX(%s,MATCH(%s,%s,0))" % (terr["ar"], prof, terr["ids"]), "", "Tableau 4", "", "alpha_r", fmt=NUM2)
+    sh.line("Hauteur de gradient", "z_g", "=INDEX(%s,MATCH(%s,%s,0))" % (terr["zg"], prof, terr["ids"]), "m", "Tableau 4", "", "z_g", fmt=NUM0)
+    zg = "C%d" % (sh.row - 1)
+    sh.line("Rugosité du sol", "α_r", "=INDEX(%s,MATCH(%s,%s,0))" % (terr["ar"], prof, terr["ids"]), "", "Tableau 4", "", "alpha_r", fmt=NUM2)
+    ar = "C%d" % (sh.row - 1)
     chv = sh.line("Coefficient de profil", "c_h", "=%s*((%s/%s)^%s+%s)^2" % (refs["ch_factor"], zu, zg, ar, refs["ch_offset"]), "", "6.2.1.2 (12)", "c_h = 1,6 · [(z / z_g)^α_r + 0,375]²", "c_h", "result", NUM3)
     qp = sh.line("Pression dynamique", "q_p", "=%s*%s" % (chv, qp0), "kN/m²", "6.2.1.1 (11)", "q_p = c_h · q_p0", "q_p", "result", NUM3)
     sh.skip()
-    sh.section("4. Coefficients de réduction (figure 9)")
+    sh.section("3. Coefficients de réduction (figure 9)")
 
     def c_red_lines(beta_expr, tag, label):
         """sia261_wind.c_red: linear in h along each curve, linear in log(β) between two curves; below 5 m the first value, beyond a curve its last."""
@@ -692,7 +638,7 @@ def build_wind():
         tb = "(LN(%s)-LN(INDEX(%s,%s)))/(LN(INDEX(%s,%s+1))-LN(INDEX(%s,%s)))" % (bt, f9r["betas"], j_, f9r["betas"], j_, f9r["betas"], j_)
         formula = "=IF(%s<=INDEX(%s,1),%s,IF(%s>=INDEX(%s,%d),%s,%s+(%s-%s)*%s))" % (
             bt, f9r["betas"], along("1"), bt, f9r["betas"], nb, along(str(nb)), along(j_), along(j_ + "+1"), along(j_), tb)
-        return bt, sh.line("Coefficient de réduction, surface %s" % label.split(" ")[0].replace("b/h", "b·h").replace("d/h", "d·h"), "c_red,%s" % label.split(" ")[0], formula, "", "Figure 9, 6.3.2",
+        return bt, sh.line("Coefficient de réduction, surface %s" % label.replace("/", "·"), "c_red,%s" % label, formula, "", "Figure 9, 6.3.2",
                            "Pour une direction à moins de 15° des directions de référence ; au-delà, le plus grand des deux (6.3.3).", "c_red_" + tag, "result", NUM3)
     beta_bh, cbh = c_red_lines("%s/%s" % (b, h), "bh", "b/h")
     beta_dh, cdh = c_red_lines("%s/%s" % (dd, h), "dh", "d/h")
@@ -700,37 +646,56 @@ def build_wind():
     sh.line("Coefficient de réduction, toit et autres surfaces", "c_red", "=" + refs["cred_roof"], "", "6.3.2", "", "c_red_toit", fmt=NUM2)
     sh.skip()
 
-    # --- the detail per direction, to the right (wind_forces.global_forces and local_pressures, row by row)
+    # --- the right side: the pictures, then the table and the detail per direction
     X = 8   # column H
-    widths = [5, 30, 10, 9, 13, 7, 7, 7, 4] + [9] * 6 + [9] * 6 + [9] * 6 + [10, 8, 10, 8, 10, 11, 11]
+    widths = [5, 28, 10, 9, 10, 8, 10, 8] + [9] * nr + [7] * (2 * nr) + [10] * (2 * nr) + [10, 8, 10, 8, 10, 12, 12]
     for i, w in enumerate(widths):
         ws.column_dimensions[col(X + i)].width = w
-    C = {name: X + i for i, name in enumerate(["n", "label", "group", "surface", "area", "factor", "own", "cpi", "direct"])}
-    VAL, QMAX, QMIN = X + 9, X + 15, X + 21
-    TAIL = X + 27
+    put(ws, 1, X, "Le bâtiment du tableau %s : les zones de l'annexe C, vues de trois côtés (Woodcore, wind_geometry)" % number, F_HEAD)
+    folded = set(range(8 + nr, 8 + 3 * nr))   # the larger and smaller values, hidden below: no picture may stand in them
+    shown_w = [0 if i in folded else w for i, w in enumerate(widths)]
+    x_px = [sum(shown_w[:i]) * 7 for i in range(len(widths) + 1)]   # a column of width w is about 7·w pixels
+    tall = 0
+    pics = [VIEWS / ("T%s-%d.png" % (number, k)) for k in (1, 2, 3)]
+    figure = NORM_FIGURES / ("T%s.png" % number)
+    if figure.exists():
+        pics = [figure] + pics
+    at = 0
+    for p in pics:
+        if not p.exists():
+            continue
+        j = next(i for i, x in enumerate(x_px) if x >= at and i not in folded)
+        tall = max(tall, picture(ws, p, "%s2" % col(X + j), VIEW_PX[0]))
+        at = x_px[j] + VIEW_PX[0] + 8
+    top = 2 + int(tall / 20) + 2   # a row is 20 pixels
+
+    C = {name: X + i for i, name in enumerate(["n", "label", "group", "surface", "area", "factor", "own", "cpi"])}
+    VAL, HI, LO = X + 8, X + 8 + nr, X + 8 + 2 * nr
+    QMAX, QMIN = X + 8 + 3 * nr, X + 8 + 4 * nr
+    TAIL = X + 8 + 5 * nr
     C.update({"max": TAIL, "phimax": TAIL + 1, "min": TAIL + 2, "phimin": TAIL + 3, "aref": TAIL + 4, "Qmax": TAIL + 5, "Qmin": TAIL + 6})
-    top = 4
-    hdr = top + 1
-    c0 = ws.cell(top, X, "Détail par direction du vent : coefficients du tableau choisi et q_k = c_red · c_d · c_f · q_p (forces, kN/m²) ou q_p · (c_d · c_pe − c_pi) (pressions, kN/m²)")
-    c0.font = F_HEAD
-    phi_row, obl_row = hdr, hdr + 1
-    labels = ["n°", "Colonne du tableau", "Groupe", "Surface", "Aire de réf.", "Facteur", "c_pi propre", "c_pi lu", "*"]
-    for i, t_ in enumerate(labels):
+    for j in range(HI, QMAX):   # the larger and the smaller value of each cell: what the formulas read, folded away
+        ws.column_dimensions[col(j)].outlineLevel = 1
+        ws.column_dimensions[col(j)].hidden = True
+    put(ws, top, X, "Tableau %s de SIA 261:2020 (lu dans woodwork/data/sia261/), une ligne par colonne du tableau ; à droite q_k = c_red · c_d · c_f · q_p (forces) ou q_p · (c_d · c_pe − c_pi) (pressions), en kN/m²" % number, F_HEAD)
+    phi_row, obl_row = top + 1, top + 2
+    for i, t_ in enumerate(["n°", "Colonne du tableau", "Groupe", "Surface", "Aire de réf.", "Facteur", "c_pi propre", "c_pi lu"]):
         put(ws, phi_row, X + i, t_, F_HEAD, fill=FILL_HEAD)
-        put(ws, obl_row, X + i, "oblique ? (6.3.3)" if i == 1 else "", F_REF)
-    for r_ in range(MAX_ROWS):
-        for base_, word in ((VAL, ""), (QMAX, "max "), (QMIN, "min ")):
-            put(ws, phi_row, base_ + r_, '=IF(%d<=%s,"%s"&INDEX(%s,%s+8+%d,2),"")' % (r_ + 1, nrows, word, "%s!$A$1:$C$%d" % (q(ac.title), start + n * BLOCK), S0, r_, ), F_HEAD, fill=FILL_HEAD)
-        put(ws, obl_row, VAL + r_, '=IF(%d<=%s,INDEX(%s,%s+8+%d,3),"")' % (r_ + 1, nrows, "%s!$A$1:$C$%d" % (q(ac.title), start + n * BLOCK), S0, r_), F_REF)
+    put(ws, obl_row, C["label"], "oblique ? (6.3.3)", F_REF)
+    for r_, row in enumerate(rows):
+        for base_, word in ((VAL, ""), (HI, "≥ "), (LO, "≤ "), (QMAX, "q max "), (QMIN, "q min ")):
+            put(ws, phi_row, base_ + r_, word + row["label"], F_HEAD, fill=FILL_HEAD)
+            put(ws, obl_row, base_ + r_, 1 if oblique(row["label"], rule) else 0, F_REF)
     for i, t_ in enumerate(["q_k max", "φ", "q_k min", "φ", "A_ref [m²]", "Q_k max [kN]", "Q_k min [kN]"]):
         put(ws, phi_row, TAIL + i, t_, F_HEAD, fill=FILL_HEAD)
+    first = obl_row + 1
+    last = first + n - 1
     # the areas of the force coefficients' headers (sia261_wind.area), the building's own b, d, h
-    area_row = top + 2 + MAX_COLS + 2
-    put(ws, area_row, X + 1, "Aires de référence des en-têtes (6.2.3.2)", F_HEAD)
-    area_cells = {}
+    area_row = last + 2
+    put(ws, area_row, C["label"], "Aires de référence des en-têtes (6.2.3.2)", F_HEAD)
     for k, (label, terms) in enumerate(areas.items()):
         rr = area_row + 1 + k
-        put(ws, rr, X + 1, label, F_BASE)
+        put(ws, rr, C["label"], label, F_BASE)
         parts = []
         for tm in terms:
             f = "%s" % tm["k"]
@@ -740,104 +705,121 @@ def build_wind():
                 if tm.get(dim):
                     f += "*%s^%d" % (ref, tm[dim])
             parts.append(f)
-        put(ws, rr, X + 2, "=" + "+".join(parts), F_BASE, NUM2)
-        area_cells[label] = rr
-    area_labels = "$%s$%d:$%s$%d" % (col(X + 1), area_row + 1, col(X + 1), area_row + len(areas))
-    area_values = "$%s$%d:$%s$%d" % (col(X + 2), area_row + 1, col(X + 2), area_row + len(areas))
-    meta = lambda key, i: "INDEX(%s,%s+%d,%d)" % (acr, S0, META[key], i)
-    for i in range(1, MAX_COLS + 1):
-        rr = obl_row + i
+        put(ws, rr, C["group"], "=" + "+".join(parts), F_BASE, NUM2)
+    area_labels = "$%s$%d:$%s$%d" % (col(C["label"]), area_row + 1, col(C["label"]), area_row + len(areas))
+    area_values = "$%s$%d:$%s$%d" % (col(C["group"]), area_row + 1, col(C["group"]), area_row + len(areas))
+    colrange = lambda j: "$%s$%d:$%s$%d" % (col(j), first, col(j), last)
+    phis = "$%s$%d:$%s$%d" % (col(VAL), phi_row, col(VAL + nr - 1), phi_row)
+    phi_label = lambda j: "INDEX(%s,MATCH(%%s,%%s,0))" % phis
+    detail_row = {}
+    for i, c in enumerate(cols):
+        rr = first + i
+        detail_row[i] = rr
         R = lambda name: "$%s%d" % (col(C[name]), rr)
-        put(ws, rr, C["n"], i, F_REF)
-        inside = "%d<=INDEX(%s,%s)" % (i, IX["Colonnes"], ti)
-        put(ws, rr, C["label"], '=IF(%s,%s,"")' % (inside, meta("label", i)))
-        put(ws, rr, C["group"], '=IF(%s,%s,"")' % (inside, meta("group", i)), F_REF)
-        put(ws, rr, C["surface"], '=IF(%s,%s,"")' % (inside, meta("surface", i)))
-        put(ws, rr, C["area"], '=IF(%s,%s,"")' % (inside, meta("area", i)))
-        put(ws, rr, C["factor"], '=IF(%s,%s,"")' % (inside, meta("factor", i)), F_REF)
-        put(ws, rr, C["own"], '=IF(%s,%s,0)' % (inside, meta("own_cpi", i)), F_REF)
-        is_cpe = 'OR(%s="cpe",%s="cpe_local")' % (R("group"), R("group"))
-        is_cf = 'OR(%s="cf",%s="cf_snow")' % (R("group"), R("group"))
-        put(ws, rr, C["cpi"], "=IF(%s,IF(%s>0,%s,%s),0)" % (is_cpe, opcol, opcol, R("own")), F_REF)
-        put(ws, rr, C["direct"], '=IF(%s,%s,0)' % (inside, meta("direct", i)), F_REF)
-        for r_ in range(MAX_ROWS):
-            live = "AND(%s,%d<=%s)" % (inside, r_ + 1, nrows)
-            shown = "INDEX(%s,%s+8+%d,%d)" % (acr, S0, r_, i)
-            put(ws, rr, VAL + r_, '=IF(%s,IF(%s="","",%s),"")' % (live, shown, shown), fmt=NUM2)
-            hi = "INDEX(%s,%s+14+%d,%d)" % (acr, S0, r_, i)
-            lo = "INDEX(%s,%s+20+%d,%d)" % (acr, S0, r_, i)
-            obl = "INDEX(%s,%s+8+%d,%d)" % ("%s!$A$1:$C$%d" % (q(ac.title), start + n * BLOCK), S0, r_, 3)
+        net = c["surface"][:-2] if c.get("surface", "").endswith("_e") else c.get("surface", "")
+        jj = own.get(c.get("surface"), own.get(net + "_i")) if c["group"] in ("cpe", "cpe_local") else None
+        is_cpe = c["group"] in ("cpe", "cpe_local")
+        is_cf = c["group"] in ("cf", "cf_snow")
+        direct = any(row["values"][i] == "direct" for row in rows)
+        put(ws, rr, C["n"], i + 1, F_REF)
+        put(ws, rr, C["label"], column_words(c), F_HEAD)
+        put(ws, rr, C["group"], c["group"], F_REF)
+        put(ws, rr, C["surface"], net if is_cpe else "")
+        put(ws, rr, C["area"], c.get("area", "") or "")
+        put(ws, rr, C["factor"], c.get("area_factor") or 1, F_REF)
+        put(ws, rr, C["own"], 0 if jj is None else jj + 1, F_REF)
+        put(ws, rr, C["cpi"], ("=IF(%s>0,%s,%s)" % (opcol, opcol, R("own"))) if is_cpe else 0, F_REF)
+        for r_, row in enumerate(rows):
+            shown, hi, lo = cell_values(row["values"][i])
+            put(ws, rr, VAL + r_, shown, F_BASE, NUM2)
+            put(ws, rr, HI + r_, hi, F_DATA)
+            put(ws, rr, LO + r_, lo, F_DATA)
+            obl = "$%s$%d" % (col(VAL + r_), obl_row)
+            hi_c, lo_c = "%s%d" % (col(HI + r_), rr), "%s%d" % (col(LO + r_), rr)
             factor = 'IF(%s="b·h",IF(%s=1,%s,%s),IF(%s="d·h",IF(%s=1,%s,%s),1))' % (R("area"), obl, cmax, cbh, R("area"), obl, cmax, cdh)
-            p_lo = "IF(%s=0,0,IF(ISNUMBER(INDEX(%s,%s+20+%d,%s)),INDEX(%s,%s+20+%d,%s),0))" % (R("cpi"), acr, S0, r_, R("cpi"), acr, S0, r_, R("cpi"))
-            p_hi = "IF(%s=0,0,IF(ISNUMBER(INDEX(%s,%s+14+%d,%s)),INDEX(%s,%s+14+%d,%s),0))" % (R("cpi"), acr, S0, r_, R("cpi"), acr, S0, r_, R("cpi"))
-            for base_, v, p in ((QMAX, hi, p_lo), (QMIN, lo, p_hi)):
-                put(ws, rr, base_ + r_, '=IF(AND(%s,ISNUMBER(%s)),IF(%s,%s*%s*%s*%s,IF(AND(%s,%s=0),%s*%s*%s*%s,"")),"")' % (
-                    live, v, is_cpe, qp, "(%s*%s-%s)" % (cd, v, p), 1, 1, is_cf, R("direct"), factor, cd, v, qp), fmt=NUM3)
-        qmax_rng = "$%s%d:$%s%d" % (col(QMAX), rr, col(QMAX + MAX_ROWS - 1), rr)
-        qmin_rng = "$%s%d:$%s%d" % (col(QMIN), rr, col(QMIN + MAX_ROWS - 1), rr)
-        phis = "$%s$%d:$%s$%d" % (col(VAL), phi_row, col(VAL + MAX_ROWS - 1), phi_row)
+            for base_, v, other in ((QMAX, hi_c, colrange(LO + r_)), (QMIN, lo_c, colrange(HI + r_))):
+                if is_cpe:
+                    p = "IF(%s=0,0,IF(ISNUMBER(INDEX(%s,%s)),INDEX(%s,%s),0))" % (R("cpi"), other, R("cpi"), other, R("cpi"))
+                    f = '=IF(ISNUMBER(%s),%s*(%s*%s-%s),"")' % (v, qp, cd, v, p)
+                elif is_cf and not direct:
+                    f = '=IF(ISNUMBER(%s),%s*%s*%s*%s,"")' % (v, factor, cd, v, qp)
+                else:
+                    f = ""
+                put(ws, rr, base_ + r_, f, F_BASE, NUM3)
+        if not (is_cpe or (is_cf and not direct)):
+            continue
+        qmax_rng = "$%s%d:$%s%d" % (col(QMAX), rr, col(QMAX + nr - 1), rr)
+        qmin_rng = "$%s%d:$%s%d" % (col(QMIN), rr, col(QMIN + nr - 1), rr)
         put(ws, rr, C["max"], '=IF(COUNT(%s)=0,"",MAX(%s))' % (qmax_rng, qmax_rng), F_RESULT, NUM3)
         put(ws, rr, C["phimax"], '=IF(%s="","",INDEX(%s,MATCH(%s,%s,0)))' % (R("max"), phis, R("max"), qmax_rng))
         put(ws, rr, C["min"], '=IF(COUNT(%s)=0,"",MIN(%s))' % (qmin_rng, qmin_rng), F_RESULT, NUM3)
         put(ws, rr, C["phimin"], '=IF(%s="","",INDEX(%s,MATCH(%s,%s,0)))' % (R("min"), phis, R("min"), qmin_rng))
-        put(ws, rr, C["aref"], '=IF(AND(%s,%s=0),IFERROR(%s*INDEX(%s,MATCH(%s,%s,0)),"par m²"),"")' % (is_cf, R("direct"), R("factor"), area_values, R("area"), area_labels), fmt=NUM2)
-        put(ws, rr, C["Qmax"], '=IF(AND(ISNUMBER(%s),ISNUMBER(%s)),%s*%s,"")' % (R("aref"), R("max"), R("aref"), R("max")), F_RESULT, NUM1)
-        put(ws, rr, C["Qmin"], '=IF(AND(ISNUMBER(%s),ISNUMBER(%s)),%s*%s,"")' % (R("aref"), R("min"), R("aref"), R("min")), F_RESULT, NUM1)
-    first_detail = obl_row + 1
-    detail = lambda name: "$%s$%d:$%s$%d" % (col(C[name]), first_detail, col(C[name]), first_detail + MAX_COLS - 1)
+        if is_cf:
+            put(ws, rr, C["aref"], '=IFERROR(%s*INDEX(%s,MATCH(%s,%s,0)),"par m²")' % (R("factor"), area_values, R("area"), area_labels), fmt=NUM2)
+            put(ws, rr, C["Qmax"], '=IF(AND(ISNUMBER(%s),ISNUMBER(%s)),%s*%s,"")' % (R("aref"), R("max"), R("aref"), R("max")), F_RESULT, NUM1)
+            put(ws, rr, C["Qmin"], '=IF(AND(ISNUMBER(%s),ISNUMBER(%s)),%s*%s,"")' % (R("aref"), R("min"), R("aref"), R("min")), F_RESULT, NUM1)
 
-    # --- the results on the left: the forces, then the pressures, slot by slot (Tableaux: the n-th c_f, the n-th c_pe)
-    sh.section("5. Forces globales (6.2.3.2)")
-    sh.text("q_k = c_red · c_d · c_f · q_p (15), le plus grand et le plus petit sur les directions du tableau ; Q_k = q_k · A_ref. Valeurs négatives : succion.")
-    sh.head(["Coefficient de force (aire de référence)", "A_ref [m²]", "q_k max [kN/m²]", "φ", "q_k min [kN/m²]", "Q_k max · Q_k min [kN] (φ)"])
-    for k in range(cf_slots):
-        rr = sh.row
-        idx = "INDEX(%s,%s)" % (IX["c_f n°%d" % (k + 1)], ti)
-        get = lambda name: "INDEX(%s,%s)" % (detail(name), idx)
-        ws.cell(rr, 1, '=IF(%s=0,"",%s&IF(%s=1," : calculé directement par la norme (*), non calculé ici",""))' % (idx, get("label"), get("direct"))).font = F_BASE
-        ws.cell(rr, 2, '=IF(%s=0,"",%s)' % (idx, get("aref"))).number_format = NUM2
-        for j, name in ((3, "max"), (4, "phimax"), (5, "min")):
-            c_ = ws.cell(rr, j, '=IF(%s=0,"",%s)' % (idx, get(name)))
-            c_.number_format = NUM3
-            if j != 4:
-                c_.font, c_.fill, c_.border = F_RESULT, FILL_RESULT, BOX
-        ws.cell(rr, 6, '=IF(%s=0,"",IF(ISNUMBER(%s),TEXT(%s,"0.0")&" · "&TEXT(%s,"0.0")&" kN (φ min "&%s&")","φ min "&%s))' % (idx, get("Qmax"), get("Qmax"), get("Qmin"), get("phimin"), get("phimin"))).font = F_BASE
-        sh.name("cf%d_q_max" % (k + 1), "C%d" % rr)
-        sh.name("cf%d_q_min" % (k + 1), "E%d" % rr)
-        sh.row += 1
-    sh.skip()
-    sh.section("6. Pressions locales (6.2.2.1)")
-    sh.text("q_k = q_p · (c_d · c_pe − c_pi) (13), (14), sans c_red (6.3.1) : la plus grande pression et la plus grande succion sur les directions du tableau.")
-    sh.head(["Surface (type)", "c_pi lu", "q_k max [kN/m²]", "φ", "q_k min [kN/m²]", "φ du min"])
-    for k in range(cpe_slots):
-        rr = sh.row
-        idx = "INDEX(%s,%s)" % (IX["c_pe n°%d" % (k + 1)], ti)
-        get = lambda name: "INDEX(%s,%s)" % (detail(name), idx)
-        kind = 'IF(%s="cpe_local","locale",IF(RIGHT(%s,1)="°","point",IF(ISNUMBER(MATCH(LEFT(%s,1),{"A","B","C","D"},0))*(LEN(%s)<=2),"paroi","toit")))' % (get("group"), get("surface"), get("surface"), get("surface"))
-        ws.cell(rr, 1, '=IF(%s=0,"",%s&" ("&%s&")")' % (idx, get("surface"), kind)).font = F_BASE
-        ws.cell(rr, 2, '=IF(%s=0,"",IF(%s=0,"0",INDEX(%s,%s+%d,%s)))' % (idx, get("cpi"), acr, S0, META["label"], get("cpi"))).font = F_REF
-        for j, name in ((3, "max"), (4, "phimax"), (5, "min"), (6, "phimin")):
-            c_ = ws.cell(rr, j, '=IF(%s=0,"",IF(%s="","—",%s))' % (idx, get(name), get(name)))
-            c_.number_format = NUM3
-            if j in (3, 5):
-                c_.font, c_.fill, c_.border = F_RESULT, FILL_RESULT, BOX
-        sh.name("cpe%d_q_max" % (k + 1), "C%d" % rr)
-        sh.name("cpe%d_q_min" % (k + 1), "E%d" % rr)
-        sh.row += 1
-    sh.skip()
+    # --- the results on the left: the forces, then the pressures
+    cell = lambda name, i: "$%s$%d" % (col(C[name]), detail_row[i])
+    cfs = [i for i, c in enumerate(cols) if c["group"] in ("cf", "cf_snow")]
+    cpes = [i for i, c in enumerate(cols) if c["group"] in ("cpe", "cpe_local")]
+    direct_words = [column_words(cols[i]) for i in cfs if any(row["values"][i] == "direct" for row in rows)]
+    no_area = sorted({column_words(cols[i]).split(" (")[1][:-1] for i in cfs if cols[i]["area"] not in areas})
+    if cfs:
+        sh.section("4. Forces globales (6.2.3.2)")
+        sh.text("q_k = c_red · c_d · c_f · q_p (15), le plus grand et le plus petit sur les directions du tableau ; Q_k = q_k · A_ref. Valeurs négatives : succion.")
+        sh.head(["Coefficient de force (aire de référence)", "A_ref [m²]", "q_k max [kN/m²]", "φ", "q_k min [kN/m²]", "Q_k max · Q_k min [kN] (φ)"])
+        for k, i in enumerate(cfs):
+            rr = sh.row
+            direct = any(row["values"][i] == "direct" for row in rows)
+            ws.cell(rr, 1, column_words(cols[i]) + (" : calculé directement par la norme (*), non calculé ici" if direct else "")).font = F_BASE
+            if not direct:
+                ws.cell(rr, 2, "=" + cell("aref", i)).number_format = NUM2
+                for j, name in ((3, "max"), (4, "phimax"), (5, "min")):
+                    c_ = ws.cell(rr, j, "=" + cell(name, i))
+                    c_.number_format = NUM3
+                    if j != 4:
+                        c_.font, c_.fill, c_.border = F_RESULT, FILL_RESULT, BOX
+                ws.cell(rr, 6, '=IF(ISNUMBER(%s),TEXT(%s,"0.0")&" · "&TEXT(%s,"0.0")&" kN (φ min "&%s&")","φ min "&%s)' % (cell("Qmax", i), cell("Qmax", i), cell("Qmin", i), cell("phimin", i), cell("phimin", i))).font = F_BASE
+            sh.name("cf%d_q_max" % (k + 1), "C%d" % rr)
+            sh.name("cf%d_q_min" % (k + 1), "E%d" % rr)
+            if not direct:   # what the export to Typst reads besides: the directions of the extremes, the area
+                for name in ("phimax", "phimin", "aref", "Qmax", "Qmin"):
+                    sh.name("cf%d_%s" % (k + 1, name), "%s%d" % (col(C[name]), detail_row[i]))
+            sh.row += 1
+        sh.skip()
+    if cpes:
+        sh.section("%d. Pressions locales (6.2.2.1)" % (5 if cfs else 4))
+        sh.text("q_k = q_p · (c_d · c_pe − c_pi) (13), (14), sans c_red (6.3.1) : la plus grande pression et la plus grande succion sur les directions du tableau.")
+        sh.head(["Surface (type)", "c_pi lu", "q_k max [kN/m²]", "φ", "q_k min [kN/m²]", "φ du min"])
+        for k, i in enumerate(cpes):
+            rr = sh.row
+            c = cols[i]
+            net = c["surface"][:-2] if c["surface"].endswith("_e") else c["surface"]
+            ws.cell(rr, 1, "%s (%s)" % (net, surface_kind(c))).font = F_BASE
+            ws.cell(rr, 2, '=IF(%s=0,"0",INDEX(%s,%s))' % (cell("cpi", i), colrange(C["label"]), cell("cpi", i))).font = F_REF
+            for j, name in ((3, "max"), (4, "phimax"), (5, "min"), (6, "phimin")):
+                c_ = ws.cell(rr, j, '=IF(%s="","—",%s)' % (cell(name, i), cell(name, i)))
+                c_.number_format = NUM3
+                if j in (3, 5):
+                    c_.font, c_.fill, c_.border = F_RESULT, FILL_RESULT, BOX
+            sh.name("cpe%d_q_max" % (k + 1), "C%d" % rr)
+            sh.name("cpe%d_q_min" % (k + 1), "E%d" % rr)
+            for name in ("phimax", "phimin"):
+                sh.name("cpe%d_%s" % (k + 1, name), "%s%d" % (col(C[name]), detail_row[i]))
+            sh.row += 1
+        sh.skip()
 
     # --- the state (wind_source._problems and messages)
     pos = lambda ref: "OR(NOT(ISNUMBER(%s)),N(%s)<=0)" % (ref, ref)
+
     def in_range(beta):
         """Not sia261_wind.in_range: β outside the curves, or h below the first height or beyond the end of the two curves around β (the pair below and above, the lower one first where β is a curve's own)."""
         j = "MATCH(%s,%s,1)" % (beta, f9r["betas"])
         j = "IF(AND(INDEX(%s,%s)=%s,%s>1),%s-1,%s)" % (f9r["betas"], j, beta, j, j, j)
         return "IFERROR(OR(%s<INDEX(%s,1),%s>INDEX(%s,%d),%s<%d,%s>MIN(INDEX(%s,%s),INDEX(%s,MIN(%s+1,%d)))),TRUE)" % (
             beta, f9r["betas"], beta, f9r["betas"], nb, h, heights[0], h, f9r["hend"], j, f9r["hend"], j, nb)
-    ratio_off = "AND(ISNUMBER(%s),ISNUMBER(%s),OR(MAX(%s/%s/%s,%s/(%s/%s))>%s,MAX(%s/%s/%s,%s/(%s/%s))>%s))" % (
-        look("h/d du tableau"), look("b/d du tableau"),
-        h, dd, look("h/d du tableau"), look("h/d du tableau"), h, dd, refs["ratio_spread"],
-        b, dd, look("b/d du tableau"), look("b/d du tableau"), b, dd, refs["ratio_spread"])
+    m = re.match(r"^\s*([\d,.]+)\s*:\s*([\d,.]+)\s*:\s*([\d,.]+)\s*$", t.get("ratio") or "")
     items = [
         ("error", pos(qp0), "q_p0 : la pression dynamique de référence de l'annexe E, en kN/m², plus grande que 0."),
         ("error", 'ISNA(MATCH(%s,%s,0))' % (cat, terr["ids"]), "Catégorie de terrain : II, IIa, III ou IV (tableau 4)."),
@@ -846,21 +828,57 @@ def build_wind():
         ("error", pos(h), "h : une dimension du bâtiment en m, plus grande que 0."),
         ("error", "AND(ISNUMBER(%s),N(%s)>%s)" % (h, h, refs["max_height"]), '="h = "&%s&" m : les dispositions valent pour les bâtiments jusqu\'à "&%s&" m (6.1.2)."' % (h, refs["max_height"])),
         ("error", 'AND(%s<>"",OR(NOT(ISNUMBER(%s)),N(%s)<=0))' % (z_in, z_in, z_in), "z : la hauteur au-dessus du sol en m, ou vide pour z = h."),
-        ("error", "ISNA(%s)" % ti, "Tableau : un des bâtiments de l'annexe C (31 à 60b, 63, 64)."),
         ("error", pos(cd), "c_d : le coefficient dynamique, plus grand que 0 (1,0 selon 6.3.5)."),
-        ("error", "ISNA(%s)" % opn, "Ouvertures : réparties ou une ouverture dominante dans la paroi A, B, C ou D."),
+    ]
+    if opn:
+        items.append(("error", "ISNA(%s)" % opn, "Ouvertures : réparties ou une ouverture dominante dans la paroi A, B, C ou D."))
+    items += [
         ("info", "AND(ISNUMBER(%s),%s<%s)" % (z, z, zu), '="z = "&%s&" m est relevé à "&%s&" m (6.2.1.2)."' % (z, zu)),
         ("info", 'AND(%s="IV",%s<>%s)' % (cat, prof, cat), "Catégorie IV au-dessus de 30 m : lue sur le profil de la catégorie III (6.2.1.2)."),
         ("info", "AND(ISNUMBER(%s),%s>%s,%s=%s)" % (h, h, refs["cd_height"], cd, refs["cd_default"]), "h dépasse 15 m : c_d = 1,0 ne vaut que pour les bâtiments que nomme 6.3.5."),
         ("info", "AND(ISNUMBER(%s),ISNUMBER(%s),%s)" % (h, beta_bh, in_range(beta_bh)), '="Surface b·h : h = "&%s&" m et β = "&TEXT(%s,"0.000")&" ne sont pas dessinés par la figure 9 ; c_red est lu au bout de la courbe la plus proche."' % (h, beta_bh)),
         ("info", "AND(ISNUMBER(%s),ISNUMBER(%s),%s)" % (h, beta_dh, in_range(beta_dh)), '="Surface d·h : h = "&%s&" m et β = "&TEXT(%s,"0.000")&" ne sont pas dessinés par la figure 9 ; c_red est lu au bout de la courbe la plus proche."' % (h, beta_dh)),
-        ("info", "AND(NOT(ISNA(%s)),%s)" % (ti, ratio_off), '="Proportions saisies "&TEXT(%s/%s,"0.00")&" : "&TEXT(%s/%s,"0.00")&" : 1 loin de celles du tableau ("&%s&") : le tableau convient-il ?"' % (h, dd, b, dd, look("h : b : d"))),
-        ("info", 'AND(NOT(ISNA(%s)),%s<>"")' % (ti, look("Colonnes « * »")), '="Tableau "&%s&" : "&%s&" calculé directement par la norme (*), non calculé ici."' % (tab, look("Colonnes « * »"))),
-        ("info", 'AND(NOT(ISNA(%s)),%s<>"")' % (ti, look("Surfaces sans aire")), '="Tableau "&%s&" : aire de référence "&%s&" non tirée de b, d, h ; la force est donnée par m² seulement."' % (tab, look("Surfaces sans aire"))),
-        ("info", 'AND(NOT(ISNA(%s)),%s<>"")' % (ti, look("Remarques")), '="Remarque du tableau : "&%s' % look("Remarques")),
     ]
+    if m:
+        hb = [float(x.replace(",", ".")) for x in m.groups()]
+        rhd, rbd = hb[0] / hb[2], hb[1] / hb[2]
+        ratio_off = "AND(ISNUMBER(%s),ISNUMBER(%s),ISNUMBER(%s),OR(MAX(%s/%s/%r,%r/(%s/%s))>%s,MAX(%s/%s/%r,%r/(%s/%s))>%s))" % (
+            h, b, dd, h, dd, rhd, rhd, h, dd, refs["ratio_spread"], b, dd, rbd, rbd, b, dd, refs["ratio_spread"])
+        items.append(("info", ratio_off, '="Proportions saisies "&TEXT(%s/%s,"0.00")&" : "&TEXT(%s/%s,"0.00")&" : 1 loin de celles du tableau (%s) : le tableau convient-il ?"' % (h, dd, b, dd, t["ratio"])))
+    if direct_words:
+        items.append(("info", "TRUE", "Tableau %s : %s calculé directement par la norme (*), non calculé ici." % (number, ", ".join(direct_words))))
+    if no_area:
+        items.append(("info", "TRUE", "Tableau %s : aire de référence %s non tirée de b, d, h ; la force est donnée par m² seulement." % (number, ", ".join(no_area))))
+    for note in t.get("notes") or []:
+        items.append(("info", "TRUE", "Remarque du tableau : " + note))
     messages_block(sh, items)
     ws.freeze_panes = "A4"
+    return ws
+
+
+def build_wind():
+    clause = norm("6.2-wind")["clause"]
+    tables = [wind_table(n) for n in WIND_TABLES]
+    wb = Workbook()
+    ix = wb.active
+    ix.title = "Sommaire"
+    ix.sheet_view.showGridLines = False
+    refs = wind_common(wb, clause)
+    put(ix, 1, 1, "Action du vent — SIA 261:2020, chapitre 6 et annexe C", F_TITLE)
+    put(ix, 2, 1, "Une feuille par tableau de l'annexe C : choisir celle du bâtiment, y saisir les cellules jaunes. Pour un deuxième bâtiment du même tableau, copier la feuille.", F_SUB)
+    put(ix, 3, 1, "Les valeurs de la norme : « Données SIA 261 », « Figure 9 », et sur chaque feuille son tableau. Les vues 3D sont celles de Woodcore.", F_SUB)
+    for j, (h_, w) in enumerate((("Tableau", 12), ("Bâtiment", 70), ("h : b : d", 14), ("Toit", 30))):
+        put(ix, 5, 1 + j, h_, F_HEAD, fill=FILL_HEAD)
+        ix.column_dimensions[col(1 + j)].width = w
+    for k, t in enumerate(tables):
+        ws = wind_table_sheet(wb, t, clause, refs)
+        c = put(ix, 6 + k, 1, t["number"], Font(name=FONT, size=10, color="0563C1", underline="single"))
+        c.hyperlink = "#%s!A1" % quoted(ws.title)
+        put(ix, 6 + k, 2, t["title"], F_BASE)
+        put(ix, 6 + k, 3, t.get("ratio") or "", F_BASE)
+        put(ix, 6 + k, 4, t.get("roof") or "", F_BASE)
+    wb.move_sheet("Données SIA 261", offset=len(tables))
+    wb.move_sheet("Figure 9", offset=len(tables))
     return finish(wb, OUT / "vent.xlsx")
 
 
@@ -991,6 +1009,7 @@ def composition_sheet(wb, title, mat, roles, template=None):
         put(ws, r, 20, '=IF(%s="","",IFERROR(INDEX(%s,MATCH(%s,%s,0)),""))' % (ref(4), mat["battens"], ref(4), mat["names"]), F_REF)   # T: «oui» where the tile carries its battens
     ws.column_dimensions["S"].hidden = True
     ws.column_dimensions["T"].hidden = True
+    ws.defined_names["couches"] = DefinedName("couches", attr_text="%s!$A$%d:$T$%d" % (quoted(ws.title), first, last))   # the layers, for the export to Typst
     sh.row = last + 2
     rng = lambda j: "$%s$%d:$%s$%d" % (T(j), first, T(j), last)
     def total(label, symbol, value, unit, remark, name, kind="calc", fmt=NUM3):
