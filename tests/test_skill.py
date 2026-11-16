@@ -25,6 +25,9 @@ def test_the_skill_is_named_and_says_when_to_use_it():
     head = SKILL_MD.split("---")[1]
     assert re.search(r"^name: woodwork-report$", head, re.M), head
     assert re.search(r"^description: .*Typst.*", head, re.M), head
+    # YAML reads « #» as the start of a comment: a description holding one is cut there (claude.ai showed it ending at «with»)
+    description = re.search(r"^description: (.*)$", head, re.M).group(1)
+    assert " #" not in description and ": " not in description, description
 
 
 def test_the_skill_source_holds_no_copy_of_the_engine_or_the_docs():
@@ -93,7 +96,19 @@ def test_the_zip_holds_the_skill_under_its_folder_and_installs_nothing():
     files = install_skill.assemble()
     with zipfile.ZipFile(path) as z:
         held = {name: z.read(name) for name in z.namelist()}
-    assert held == {"woodwork-report/" + rel: data for rel, data in files.items()}
+    # claude.ai takes 200 files at most: the three trees are packed, one inner zip each, and unpacked they are the assembled skill
+    assert len(held) <= 200, len(held)
+    unpacked = {}
+    for name, data in held.items():
+        rel = name[len("woodwork-report/"):]
+        assert name.startswith("woodwork-report/"), name
+        if rel in ("assets/woodwork.zip", "assets/sheets.zip", "assets/templates.zip"):
+            import io
+            with zipfile.ZipFile(io.BytesIO(data)) as inner:
+                unpacked.update({"assets/" + n: inner.read(n) for n in inner.namelist()})
+        else:
+            unpacked[rel] = data
+    assert unpacked == files
     assert b"Woodwork version of this copy: " in held["woodwork-report/SKILL.md"]
     after = home.exists() and sorted(p.as_posix() for p in home.rglob("*"))
     assert before == after, "--zip touched the real ~/.claude/skills"

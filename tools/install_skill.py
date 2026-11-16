@@ -3,12 +3,13 @@
     python tools/install_skill.py                 writes ~/.claude/skills/woodwork-report/
     python tools/install_skill.py --dest <dir>    writes <dir>/woodwork-report/ instead
     python tools/install_skill.py --check         says whether ~/.claude/skills/woodwork-report/ (or --dest) is what this script would write
-    python tools/install_skill.py --zip <file>    writes the skill into a zip (a folder woodwork-report/ at its root) to upload to claude.ai, Plugins > Skills; installs nothing
+    python tools/install_skill.py --zip <file>    writes the skill into a zip (a folder woodwork-report/ at its root, assets/ packed into three inner zips: claude.ai takes 200 files at most) to upload to claude.ai, Plugins > Skills; installs nothing
 
 The skill is written once, in `skill/woodwork-report/SKILL.md`; everything else in it is a copy made here, never by hand: `assets/woodwork/` is `woodwork/`, `assets/sheets/` is `sheets/`, `assets/templates/` is `templates/`, `references/commands.md` is `docs/typst/commands.md`, and `references/catalog.md` is computed from `source/sheets/` through `tools/generate.py`. The version written into SKILL.md is `woodwork-version` of `woodwork/woodwork.typ`. An installed copy, or an uploaded zip, does not follow the repository: run this script again after a change (decisions D-23, D-25).
 """
 
 import argparse
+import io
 import re
 import shutil
 import sys
@@ -121,13 +122,40 @@ def install(dest):
     return folder
 
 
+# claude.ai refuses a skill's zip of more than 200 files (16 Nov 2026): the copies of COPIES go into one inner archive each, assets/<name>.zip holding <name>/…, which the skill unzips before use (D-25).
+ZIP_MAX_FILES = 200
+
+
+def zip_entries():
+    """{path in the uploaded zip: bytes}: the skill under woodwork-report/, each tree of COPIES packed into assets/<name>.zip."""
+    files = assemble()
+    entries = {}
+    packed = {prefix: {} for prefix in COPIES}
+    for rel, data in files.items():
+        prefix = next((p for p in COPIES if rel.startswith(p + "/")), None)
+        if prefix is None:
+            entries["%s/%s" % (NAME, rel)] = data
+        else:
+            # assets/woodwork/lib/x.typ -> woodwork/lib/x.typ inside assets/woodwork.zip
+            packed[prefix][rel[len("assets/"):]] = data
+    for prefix, inner in packed.items():
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as z:
+            for rel in sorted(inner):
+                z.writestr(rel, inner[rel])
+        entries["%s/%s.zip" % (NAME, prefix)] = buffer.getvalue()
+    if len(entries) > ZIP_MAX_FILES:
+        raise SystemExit("the zip would hold %d files, claude.ai takes %d" % (len(entries), ZIP_MAX_FILES))
+    return entries
+
+
 def write_zip(path):
-    """Writes the skill into the zip `path`, every file under woodwork-report/, as claude.ai's upload of a skill expects; returns the path."""
+    """Writes the skill into the zip `path`, as claude.ai's upload of a skill expects; returns the path."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
-        for rel, data in assemble().items():
-            z.writestr("%s/%s" % (NAME, rel), data)
+        for rel, data in zip_entries().items():
+            z.writestr(rel, data)
     return path
 
 

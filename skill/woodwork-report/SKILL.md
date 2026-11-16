@@ -1,6 +1,6 @@
 ---
 name: woodwork-report
-description: Write a structural calculation report for timber in Typst with the Woodwork engine (SIA 260, 261, 265) — install the engine into a Typst project, start from the Simple Report or the full statical report, paste and adapt Woodwork's checks (tension, compression, bending, shear, buckling, lateral-torsional buckling) or write free calculations with #domain, #var, #eq, #verify and #material, then compile and fix. Use whenever the user asks for a timber calculation sheet, a member check, a «Nachweis», a «vérification», or a static report in Typst.
+description: Write a structural calculation report for timber in Typst with the Woodwork engine (SIA 260, 261, 265) — install the engine into a Typst project, start from the Simple Report or the full statical report, paste and adapt Woodwork's checks (tension, compression, bending, shear, buckling, lateral-torsional buckling) or write free calculations with the commands domain, var, eq, verify and material, then compile and fix. Use whenever the user asks for a timber calculation sheet, a member check, a «Nachweis», a «vérification», or a static report in Typst.
 ---
 
 # woodwork-report — timber calculation reports in Typst
@@ -16,6 +16,8 @@ Everything below lives next to this file, in the skill's base directory:
 | `assets/templates/fr/`, `de/`, `en/` | The content templates: the Simple Report, the full statical report, the basis of design, the service criteria agreement, the title pages. |
 | `references/catalog.md` | Every check: its title, its files in each language, the values to change. Read it to choose a sheet. |
 | `references/commands.md` | The reference of every command and argument. Read the section you need before writing a line you have not seen in a sheet. |
+
+Uploaded to claude.ai, the skill holds `assets/woodwork.zip`, `assets/sheets.zip` and `assets/templates.zip` instead of the three folders (claude.ai takes 200 files at most). Then unzip them first into a working folder of your own (`unzip -o <skill>/assets/woodwork.zip -d <work>/assets`, the same for the other two) and read every `assets/…` path below in that folder.
 
 ## Rules
 
