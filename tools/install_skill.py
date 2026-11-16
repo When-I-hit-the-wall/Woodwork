@@ -3,13 +3,14 @@
     python tools/install_skill.py                 writes ~/.claude/skills/woodwork-report/
     python tools/install_skill.py --dest <dir>    writes <dir>/woodwork-report/ instead
     python tools/install_skill.py --check         says whether ~/.claude/skills/woodwork-report/ (or --dest) is what this script would write
-    python tools/install_skill.py --zip <file>    writes the skill into a zip (a folder woodwork-report/ at its root, assets/ packed into three inner zips: claude.ai takes 200 files at most) to upload to claude.ai, Plugins > Skills; installs nothing
+    python tools/install_skill.py --zip <file>    writes the skill into a zip (a folder woodwork-report/ at its root, assets/ packed into three text bundles: claude.ai takes 200 files at most and no zip inside) to upload to claude.ai, Plugins > Skills; installs nothing
 
 The skill is written once, in `skill/woodwork-report/SKILL.md`; everything else in it is a copy made here, never by hand: `assets/woodwork/` is `woodwork/`, `assets/sheets/` is `sheets/`, `assets/templates/` is `templates/`, `references/commands.md` is `docs/typst/commands.md`, and `references/catalog.md` is computed from `source/sheets/` through `tools/generate.py`. The version written into SKILL.md is `woodwork-version` of `woodwork/woodwork.typ`. An installed copy, or an uploaded zip, does not follow the repository: run this script again after a change (decisions D-23, D-25).
 """
 
 import argparse
-import io
+import base64
+import json
 import re
 import shutil
 import sys
@@ -23,6 +24,7 @@ ROOT = generate.ROOT
 NAME = "woodwork-report"
 SKILL = ROOT / "skill" / NAME
 VERSION_MARK = "@WOODWORK_VERSION@"
+UNPACK_MARK = "@UNPACK@"
 COPIES = {"assets/woodwork": ROOT / "woodwork", "assets/sheets": ROOT / "sheets", "assets/templates": ROOT / "templates"}
 VERSION = re.compile(r'^#let woodwork-version = "([^"]+)"', re.M)
 VAR = re.compile(r'#var\("([^"]+)", ([-0-9.]+), "([^"]*)"')
@@ -77,7 +79,7 @@ def assemble():
     skill_md = (SKILL / "SKILL.md").read_text(encoding="utf-8")
     if VERSION_MARK not in skill_md:
         raise SystemExit("skill/%s/SKILL.md: no %s to stamp" % (NAME, VERSION_MARK))
-    files["SKILL.md"] = skill_md.replace(VERSION_MARK, woodwork_version()).encode("utf-8")
+    files["SKILL.md"] = skill_md.replace(VERSION_MARK, woodwork_version()).replace(UNPACK_MARK, UNPACK).encode("utf-8")
     for p in sorted(SKILL.rglob("*")):
         rel = p.relative_to(SKILL).as_posix()
         if p.is_file() and rel != "SKILL.md":
@@ -122,12 +124,23 @@ def install(dest):
     return folder
 
 
-# claude.ai refuses a skill's zip of more than 200 files (16 Nov 2026): the copies of COPIES go into one inner archive each, assets/<name>.zip holding <name>/…, which the skill unzips before use (D-25).
+# claude.ai refuses a skill's zip of more than 200 files, and a zip nested in it (16 Nov 2026): each tree of COPIES goes into one text bundle, assets/<name>.json = {"<name>/<path>": base64 of its bytes}, which the skill unpacks before use (D-25).
 ZIP_MAX_FILES = 200
+UNPACK = """python3 -c "import base64,json,pathlib,sys; [(p.parent.mkdir(parents=True, exist_ok=True), p.write_bytes(base64.b64decode(v))) for k, v in json.load(open(sys.argv[1])).items() for p in [pathlib.Path(sys.argv[2]) / k]]" <bundle> <folder>"""
+
+
+def bundle(files):
+    """A text bundle: {path: base64}, sorted, as UTF-8 JSON bytes."""
+    return json.dumps({rel: base64.b64encode(files[rel]).decode("ascii") for rel in sorted(files)}, indent=0).encode("utf-8")
+
+
+def unbundle(data):
+    """The files of a bundle, {path: bytes} -- what the command UNPACK writes."""
+    return {rel: base64.b64decode(v) for rel, v in json.loads(data).items()}
 
 
 def zip_entries():
-    """{path in the uploaded zip: bytes}: the skill under woodwork-report/, each tree of COPIES packed into assets/<name>.zip."""
+    """{path in the uploaded zip: bytes}: the skill under woodwork-report/, each tree of COPIES as assets/<name>.json."""
     files = assemble()
     entries = {}
     packed = {prefix: {} for prefix in COPIES}
@@ -136,14 +149,10 @@ def zip_entries():
         if prefix is None:
             entries["%s/%s" % (NAME, rel)] = data
         else:
-            # assets/woodwork/lib/x.typ -> woodwork/lib/x.typ inside assets/woodwork.zip
+            # assets/woodwork/lib/x.typ -> woodwork/lib/x.typ in assets/woodwork.json
             packed[prefix][rel[len("assets/"):]] = data
     for prefix, inner in packed.items():
-        buffer = io.BytesIO()
-        with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as z:
-            for rel in sorted(inner):
-                z.writestr(rel, inner[rel])
-        entries["%s/%s.zip" % (NAME, prefix)] = buffer.getvalue()
+        entries["%s/%s.json" % (NAME, prefix)] = bundle(inner)
     if len(entries) > ZIP_MAX_FILES:
         raise SystemExit("the zip would hold %d files, claude.ai takes %d" % (len(entries), ZIP_MAX_FILES))
     return entries

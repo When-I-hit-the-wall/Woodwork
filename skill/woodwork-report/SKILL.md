@@ -17,7 +17,7 @@ Everything below lives next to this file, in the skill's base directory:
 | `references/catalog.md` | Every check: its title, its files in each language, the values to change. Read it to choose a sheet. |
 | `references/commands.md` | The reference of every command and argument. Read the section you need before writing a line you have not seen in a sheet. |
 
-Uploaded to claude.ai, the skill holds `assets/woodwork.zip`, `assets/sheets.zip` and `assets/templates.zip` instead of the three folders (claude.ai takes 200 files at most). Then unzip them first into a working folder of your own (`unzip -o <skill>/assets/woodwork.zip -d <work>/assets`, the same for the other two) and read every `assets/…` path below in that folder.
+Uploaded to claude.ai, the skill holds `assets/woodwork.json`, `assets/sheets.json` and `assets/templates.json` instead of the three folders (claude.ai takes 200 files at most and no zip inside a zip): each is a bundle `{path: base64 of the file}`. Unpack the three first into a working folder of your own, in your sandbox (not in the user's project), with `@UNPACK@` — `<bundle>` the JSON, `<folder>` your `<work>/assets` — and read every `assets/…` path below in that folder.
 
 ## Rules
 

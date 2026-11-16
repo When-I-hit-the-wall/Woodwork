@@ -96,22 +96,34 @@ def test_the_zip_holds_the_skill_under_its_folder_and_installs_nothing():
     files = install_skill.assemble()
     with zipfile.ZipFile(path) as z:
         held = {name: z.read(name) for name in z.namelist()}
-    # claude.ai takes 200 files at most: the three trees are packed, one inner zip each, and unpacked they are the assembled skill
+    # claude.ai takes 200 files at most and no zip inside: the three trees are text bundles, and unpacked they are the assembled skill
     assert len(held) <= 200, len(held)
+    assert not any(name.endswith((".zip", ".tar", ".gz")) for name in held), sorted(held)
     unpacked = {}
     for name, data in held.items():
         rel = name[len("woodwork-report/"):]
         assert name.startswith("woodwork-report/"), name
-        if rel in ("assets/woodwork.zip", "assets/sheets.zip", "assets/templates.zip"):
-            import io
-            with zipfile.ZipFile(io.BytesIO(data)) as inner:
-                unpacked.update({"assets/" + n: inner.read(n) for n in inner.namelist()})
+        if rel in ("assets/woodwork.json", "assets/sheets.json", "assets/templates.json"):
+            unpacked.update({"assets/" + k: v for k, v in install_skill.unbundle(data).items()})
         else:
             unpacked[rel] = data
     assert unpacked == files
     assert b"Woodwork version of this copy: " in held["woodwork-report/SKILL.md"]
     after = home.exists() and sorted(p.as_posix() for p in home.rglob("*"))
     assert before == after, "--zip touched the real ~/.claude/skills"
+
+
+def test_the_unpack_command_of_skill_md_rebuilds_a_bundle():
+    # D-25: the one line SKILL.md gives Claude to unpack a bundle writes back every file, byte for byte
+    text = install_skill.assemble()["SKILL.md"].decode("utf-8")
+    assert install_skill.UNPACK in text and install_skill.UNPACK_MARK not in text
+    folder = tmp_dest()
+    files = {"woodwork/a.typ": b"#let a = 1\n", "woodwork/forms/logo.png": bytes(range(256))}
+    (folder / "b.json").write_bytes(install_skill.bundle(files))
+    command = install_skill.UNPACK.replace("python3", sys.executable).replace("<bundle>", '"%s"' % (folder / "b.json")).replace("<folder>", '"%s"' % (folder / "out"))
+    proc = subprocess.run(command, shell=True, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stderr
+    assert {p.relative_to(folder / "out").as_posix(): p.read_bytes() for p in (folder / "out").rglob("*") if p.is_file()} == files
 
 
 def test_the_skills_examples_compile_in_an_empty_project_with_its_engine():
