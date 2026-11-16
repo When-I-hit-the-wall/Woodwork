@@ -83,6 +83,22 @@ def test_install_writes_only_where_it_is_told_and_replaces_an_earlier_copy():
     assert before == after, "a test touched the real ~/.claude/skills"
 
 
+def test_the_zip_holds_the_skill_under_its_folder_and_installs_nothing():
+    # D-25: --zip writes every assembled file under woodwork-report/, byte for byte, and leaves ~/.claude alone
+    import zipfile
+    home = install_skill.default_dest() / "woodwork-report"
+    before = home.exists() and sorted(p.as_posix() for p in home.rglob("*"))
+    path = tmp_dest() / "woodwork-report.zip"
+    assert install_skill.main(["--zip", str(path)]) == 0
+    files = install_skill.assemble()
+    with zipfile.ZipFile(path) as z:
+        held = {name: z.read(name) for name in z.namelist()}
+    assert held == {"woodwork-report/" + rel: data for rel, data in files.items()}
+    assert b"Woodwork version of this copy: " in held["woodwork-report/SKILL.md"]
+    after = home.exists() and sorted(p.as_posix() for p in home.rglob("*"))
+    assert before == after, "--zip touched the real ~/.claude/skills"
+
+
 def test_the_skills_examples_compile_in_an_empty_project_with_its_engine():
     # REQ-003, REQ-005: what the skill teaches compiles with the engine it carries, and nothing else
     exe = typst()

@@ -3,14 +3,16 @@
     python tools/install_skill.py                 writes ~/.claude/skills/woodwork-report/
     python tools/install_skill.py --dest <dir>    writes <dir>/woodwork-report/ instead
     python tools/install_skill.py --check         says whether ~/.claude/skills/woodwork-report/ (or --dest) is what this script would write
+    python tools/install_skill.py --zip <file>    writes the skill into a zip (a folder woodwork-report/ at its root) to upload to claude.ai, Plugins > Skills; installs nothing
 
-The skill is written once, in `skill/woodwork-report/SKILL.md`; everything else in it is a copy made here, never by hand: `assets/woodwork/` is `woodwork/`, `assets/sheets/` is `sheets/`, `assets/templates/` is `templates/`, `references/commands.md` is `docs/typst/commands.md`, and `references/catalog.md` is computed from `source/sheets/` through `tools/generate.py`. The version written into SKILL.md is `woodwork-version` of `woodwork/woodwork.typ`. An installed copy does not follow the repository: run this script again after a change (decision D-a).
+The skill is written once, in `skill/woodwork-report/SKILL.md`; everything else in it is a copy made here, never by hand: `assets/woodwork/` is `woodwork/`, `assets/sheets/` is `sheets/`, `assets/templates/` is `templates/`, `references/commands.md` is `docs/typst/commands.md`, and `references/catalog.md` is computed from `source/sheets/` through `tools/generate.py`. The version written into SKILL.md is `woodwork-version` of `woodwork/woodwork.typ`. An installed copy, or an uploaded zip, does not follow the repository: run this script again after a change (decisions D-23, D-25).
 """
 
 import argparse
 import re
 import shutil
 import sys
+import zipfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -119,11 +121,26 @@ def install(dest):
     return folder
 
 
+def write_zip(path):
+    """Writes the skill into the zip `path`, every file under woodwork-report/, as claude.ai's upload of a skill expects; returns the path."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
+        for rel, data in assemble().items():
+            z.writestr("%s/%s" % (NAME, rel), data)
+    return path
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Install the Claude skill woodwork-report.")
     parser.add_argument("--dest", type=Path, default=None, help="the skills folder (default: ~/.claude/skills)")
     parser.add_argument("--check", action="store_true", help="compare the installed skill with what would be written")
+    parser.add_argument("--zip", type=Path, default=None, metavar="FILE", help="write the skill into this zip, for claude.ai, instead of installing it")
     args = parser.parse_args(argv)
+    if args.zip is not None:
+        path = write_zip(args.zip)
+        print("woodwork-report %s written to %s (%d kB): upload it in claude.ai, Plugins > Skills > Add" % (woodwork_version(), path, path.stat().st_size // 1024))
+        return 0
     dest = args.dest if args.dest is not None else default_dest()
     if args.check:
         diff = differences(assemble(), dest / NAME)

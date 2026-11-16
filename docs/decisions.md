@@ -62,5 +62,8 @@ The engineer, 16 November 2026 (spec 2026-11-16-skill-woodwork-report-et-simple-
 ## D-24 — The Simple Report, and `chapter-break` of the form bfh
 The engineer, 16 November 2026: a content template «Simple Report» with no title page of its own, a title block then «1 Section», the calculations, then «2 Annexes» (de «Abschnitt», «Anhang»; en «Section», «Appendices»), no table of contents and no bibliography (`templates/<lang>/rapport-simple/`, `einfacher-bericht/`, `simple-report/`). Its section was first «Section 1»; the engineer: «renomme "1 Section 1" en "1 Section"». The form `bfh` starts every chapter on a page of its own; rather than another form, the engineer chose a new argument, `bfh.with(chapter-break: false)` (default `true`, unchanged), which the Simple Report sets.
 
+## D-25 — The skill also as a zip for claude.ai
+The engineer, 16 November 2026: a skill copied into `~/.claude/skills/` is Claude Code's alone and never shows in claude.ai's Plugins > Skills. Of a one-off zip and an option of the script, he chose the option: `python tools/install_skill.py --zip <file>` writes the same assembled skill, under a folder `woodwork-report/`, to upload there. Cost: the uploaded zip ages like the copy, and Claude in claude.ai's chat may have no Typst to compile with.
+
 ## Licence — GPL-3.0
 Woodwork's engine derives from Woodcore, which is GPL-3.0.

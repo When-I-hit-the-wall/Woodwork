@@ -5,7 +5,7 @@ description: Write a structural calculation report for timber in Typst with the 
 
 # woodwork-report — timber calculation reports in Typst
 
-Woodwork version of this copy: @WOODWORK_VERSION@. This skill was installed by `tools/install_skill.py` of the Woodwork repository; to update it, run that script again there. Do not edit this copy.
+Woodwork version of this copy: @WOODWORK_VERSION@. This skill was installed by `tools/install_skill.py` of the Woodwork repository (into `~/.claude/skills/` for Claude Code, or as a zip uploaded to claude.ai); to update it, run that script again there. Do not edit this copy.
 
 Everything below lives next to this file, in the skill's base directory:
 

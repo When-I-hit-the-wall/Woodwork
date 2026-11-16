@@ -7,3 +7,4 @@ tests/.tmp/
 .claude/settings.local.json
 .claude/worktrees/
 tests/.last-run.json
+dist/
