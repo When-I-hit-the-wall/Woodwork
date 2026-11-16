@@ -705,6 +705,36 @@
       "fr": "Poutre tendue et fléchie autour de l'axe fort : la section par (21), le déversement par (38).",
       "de": "Gezogener und um die starke Achse gebogener Träger: der Querschnitt nach (21), das Kippen nach (38).",
       "en": "Beam in tension and bending about the strong axis: the section by (21), lateral buckling by (38)."
+    },
+    "simple-report-about": {
+      "fr": "Rapport simple : un template de fond sans page de titre séparée, sans table des matières ni bibliographie. Placez ce dossier dans votre projet et le dossier woodwork/ à la racine, remplissez les champs ci-dessous, puis écrivez vos calculs sous « Section ».",
+      "de": "Einfacher Bericht: eine Inhaltsvorlage ohne eigene Titelseite, ohne Inhaltsverzeichnis und ohne Literaturverzeichnis. Legen Sie diesen Ordner in Ihr Projekt und den Ordner woodwork/ in dessen Wurzel, füllen Sie die Felder unten aus und schreiben Sie Ihre Berechnungen unter «Abschnitt».",
+      "en": "Simple report: a content template with no title page of its own, no table of contents and no bibliography. Put this folder in your project and the folder woodwork/ at its root, fill in the fields below, then write your calculations under «Section»."
+    },
+    "heading-section": {
+      "fr": "Section",
+      "de": "Abschnitt",
+      "en": "Section"
+    },
+    "heading-appendices": {
+      "fr": "Annexes",
+      "de": "Anhang",
+      "en": "Appendices"
+    },
+    "simple-report-calc-help": {
+      "fr": "À COMPLÉTER : collez ici vos feuilles de calcul (sheets/fr/…) ou écrivez vos calculs avec #domain, #var, #eq et #verify.",
+      "de": "AUSZUFÜLLEN: Fügen Sie hier Ihre Berechnungsblätter (sheets/de/…) ein oder schreiben Sie Ihre Berechnungen mit #domain, #var, #eq und #verify.",
+      "en": "TO FILL IN: paste your calculation sheets here (sheets/en/…) or write your calculations with #domain, #var, #eq and #verify."
+    },
+    "simple-report-annex-help": {
+      "fr": "À COMPLÉTER : vos annexes (plans, extraits, résultats d'un logiciel).",
+      "de": "AUSZUFÜLLEN: Ihre Anhänge (Pläne, Auszüge, Ergebnisse einer Software).",
+      "en": "TO FILL IN: your appendices (drawings, extracts, results of a program)."
+    },
+    "language-code": {
+      "fr": "fr",
+      "de": "de",
+      "en": "en"
     }
   },
   "paths": {
@@ -852,6 +882,11 @@
       "fr": "deversement-traction",
       "de": "kippen-zug",
       "en": "lateral-torsional-tension"
+    },
+    "simple-report": {
+      "fr": "rapport-simple",
+      "de": "einfacher-bericht",
+      "en": "simple-report"
     }
   }
 }

@@ -99,8 +99,10 @@
 /// - doc (content): the document.
 /// - lang (str, none): none keeps the document's language; else the language Typst itself works in -- the hyphenation patterns, the quotation marks, the words it writes of its own accord («Abbildung»/«Fig.», the outline's title).
 /// - region (str): its region.
+/// - chapter-break (bool): true (the default) starts every chapter on a page of its own; false lets a chapter follow on the same page, as the content template «simple-report» needs after its title block.
 /// -> content
-#let bfh(doc, lang: none, region: "CH") = {
+#let bfh(doc, lang: none, region: "CH", chapter-break: true) = {
+  if type(chapter-break) != bool { panic("bfh: chapter-break must be true or false, not " + repr(chapter-break)) }
   set page(
     paper: "a4",
     margin: (top: 3.2cm, bottom: 2.5cm, left: 2.5cm, right: 2.5cm),
@@ -123,9 +125,9 @@
   show heading.where(level: 3): set text(size: 10.5pt)
   show heading.where(level: 3): set block(above: 1.5em, below: 0.8em)
 
-  // A chapter: a page of its own, its number beside its title in a lighter grey, a short yellow bar below. `weak`: no blank page where one already begins there.
+  // A chapter: a page of its own (unless `chapter-break: false`), its number beside its title in a lighter grey, a short yellow bar below. `weak`: no blank page where one already begins there.
   show heading.where(level: 1): it => {
-    pagebreak(weak: true)
+    if chapter-break { pagebreak(weak: true) }
     v(0.3cm)
     block(below: 0.9cm, {
       set block(spacing: 0.7em)

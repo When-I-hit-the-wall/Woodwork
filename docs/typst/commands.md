@@ -98,9 +98,24 @@ A **form** is the look of a document (decisions D-17): one file of `woodwork/for
 
 `neutral` (A4, 2.5 cm margins, 11 pt, page number centred), `compact` (2 cm margins, 10 pt) and `bfh` (the Berner Fachhochschule's colours, Lucida Sans, its logo and the current chapter in the header, the school's names and the page in the footer, a chapter to a page). `#show: bfh.with(lang: "de")` also sets the language Typst works in; without it the form keeps the document's. A form prints no title page.
 
+`bfh` takes `chapter-break:` -- `true` by default, every chapter on a page of its own; `false` lets a chapter follow on the same page, as the Simple Report needs after its title block (D-24). A value that is not a boolean stops the compile, naming it.
+
+```typ
+#import "/woodwork/forms/bfh.typ": bfh
+#show: bfh.with(chapter-break: false)
+
+= Section
+Calculations.
+
+= Appendices
+Drawings.
+```
+
 A **title page** is a content template: `templates/<lang>/titre-bfh.typ` (or `titre-neutre.typ`), copied beside the document, its fields filled at its top (document, project, number, rows of people, date), included first: `#include "titre-bfh.typ"`. It is a page of its own, with neither header nor footer.
 
-The three **documents** -- convention d'utilisation, base de projet, rapport de statique -- are skeletons in `templates/<lang>/`: an entry file that sets the form and includes the title page and the sections, and `Sections/` with Woodcore's headings, prose and tables to fill; where Woodcore printed its export, a comment says what to paste.
+Three of the four **documents** -- convention d'utilisation, base de projet, rapport de statique -- are skeletons in `templates/<lang>/`: an entry file that sets the form and includes the title page and the sections, and `Sections/` with Woodcore's headings, prose and tables to fill; where Woodcore printed its export, a comment says what to paste.
+
+The **Simple Report** (`templates/<lang>/rapport-simple/`, `einfacher-bericht/`, `simple-report/`, D-24) is one file: the fields of a title page at its top, a title block on the first page -- no page of its own --, then two chapters, «1 Section» for the calculations and «2 Annexes» (`Anhang`, `Appendices`), set in `bfh.with(chapter-break: false)`; no table of contents, no bibliography. A sheet pasted into it takes `==` for its heading, so the report keeps its two chapters.
 
 ### Tables in the form `bfh`
 

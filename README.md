@@ -43,7 +43,9 @@ Feuilles de calcul pour les structures en bois (SIA 260, 261, 265), écrites en 
 
 Ce que `#domain` reçoit vaut pour chacune de ses lignes ; une ligne peut l'écraser pour elle seule.
 
-**Formes et fonds** — une forme règle l'apparence : `#import "/woodwork/forms/bfh.typ": bfh` puis `#show: bfh` (aussi `neutral` et `compact`). Les pages de titre (`templates/fr/titre-bfh.typ`, `titre-neutre.typ`) et les documents (convention d'utilisation, base de projet, rapport de statique) sont des fonds à copier et remplir.
+**Formes et fonds** — une forme règle l'apparence : `#import "/woodwork/forms/bfh.typ": bfh` puis `#show: bfh` (aussi `neutral` et `compact`). Les pages de titre (`templates/fr/titre-bfh.typ`, `titre-neutre.typ`) et les documents (convention d'utilisation, base de projet, rapport de statique, rapport simple) sont des fonds à copier et remplir.
+
+**Skill Claude** — `python tools/install_skill.py` installe le skill `woodwork-report` dans `~/.claude/skills/` : Claude y trouve le moteur, les feuilles, les fonds et la méthode pour écrire un rapport de calcul avec Woodwork. Relancez-le après une mise à jour.
 
 **Contenu** — 18 vérifications de SIA 265 4.2 : traction, compression, flexion, effort tranchant, flambage, déversement. Les commandes sont décrites dans [`docs/typst/commands.md`](docs/typst/commands.md).
 
@@ -57,7 +59,7 @@ Rechenblätter für Holztragwerke (SIA 260, 261, 265), in Typst geschrieben, zum
 2. Kopieren Sie ein Blatt aus `sheets/de/`, zum Beispiel `holzquerschnitte/zug/zug-parallel.typ`, neben Ihr Dokument und binden Sie es ein: `#include "zug-parallel.typ"`.
 3. Ändern Sie die Werte: Kräfte, Abmessungen, Festigkeitsklasse. Die Werte der Norm werden aus `woodwork/data/` gelesen, nie getippt.
 
-Was `#domain` erhält, gilt für jede seiner Zeilen; eine Zeile kann es für sich allein überschreiben. Eine Form bestimmt das Aussehen (`#show: bfh`, `neutral`, `compact`); Titelseiten und Dokumente (Nutzungsvereinbarung, Projektbasis, statischer Bericht) liegen als Vorlagen in `templates/de/`. Die Befehle sind in [`docs/typst/commands.md`](docs/typst/commands.md) beschrieben.
+Was `#domain` erhält, gilt für jede seiner Zeilen; eine Zeile kann es für sich allein überschreiben. Eine Form bestimmt das Aussehen (`#show: bfh`, `neutral`, `compact`); Titelseiten und Dokumente (Nutzungsvereinbarung, Projektbasis, statischer Bericht, einfacher Bericht) liegen als Vorlagen in `templates/de/`. `python tools/install_skill.py` installiert den Claude-Skill `woodwork-report` in `~/.claude/skills/`. Die Befehle sind in [`docs/typst/commands.md`](docs/typst/commands.md) beschrieben.
 
 ## English
 
@@ -69,7 +71,7 @@ Calculation sheets for timber structures (SIA 260, 261, 265), written in Typst, 
 2. Copy a sheet of `sheets/en/`, for instance `timber-sections/tension/tension-parallel.typ`, beside your document and include it: `#include "tension-parallel.typ"`.
 3. Change the values: forces, dimensions, strength class. The norm's values are read from `woodwork/data/`, never typed.
 
-What `#domain` is given holds for each of its lines; a line may override it for itself. A form sets the look (`#show: bfh`, `neutral`, `compact`); title pages and documents (service criteria agreement, basis of design, statical report) are content templates in `templates/en/`. The commands are described in [`docs/typst/commands.md`](docs/typst/commands.md).
+What `#domain` is given holds for each of its lines; a line may override it for itself. A form sets the look (`#show: bfh`, `neutral`, `compact`); title pages and documents (service criteria agreement, basis of design, statical report, simple report) are content templates in `templates/en/`. `python tools/install_skill.py` installs the Claude skill `woodwork-report` into `~/.claude/skills/`. The commands are described in [`docs/typst/commands.md`](docs/typst/commands.md).
 
 ---
 

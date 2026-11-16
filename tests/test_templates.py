@@ -3,13 +3,17 @@
 import shutil
 import subprocess
 
-from conftest import ENGINE, ROOT, compile_typ, pdf_text, project, typst
+from conftest import ENGINE, ROOT, compile_typ, panic_message, pdf_text, project, typst
 
 FORMS = ("neutral", "compact", "bfh")
 TITLES = {"fr": ("titre-bfh", "titre-neutre"), "de": ("titel-bfh", "titel-neutral"), "en": ("title-bfh", "title-neutral")}
-DOCUMENTS = {"fr": ("convention-d-utilisation", "base-de-projet", "rapport-de-statique"),
-             "de": ("nutzungsvereinbarung", "projektbasis", "statischer-bericht"),
-             "en": ("service-criteria-agreement", "basis-of-design", "statical-report")}
+DOCUMENTS = {"fr": ("convention-d-utilisation", "base-de-projet", "rapport-de-statique", "rapport-simple"),
+             "de": ("nutzungsvereinbarung", "projektbasis", "statischer-bericht", "einfacher-bericht"),
+             "en": ("service-criteria-agreement", "basis-of-design", "statical-report", "simple-report")}
+# The simple report (spec 2026-11-16-skill-woodwork-report-et-simple-report): its two chapters, then the words of a table of contents and a bibliography it must not print.
+SIMPLE = {"fr": ("rapport-simple", "1 Section", "2 Annexes", ("Table des matières", "Bibliographie")),
+          "de": ("einfacher-bericht", "1 Abschnitt", "2 Anhang", ("Inhaltsverzeichnis", "Literaturverzeichnis")),
+          "en": ("simple-report", "1 Section", "2 Appendices", ("Contents", "Bibliography"))}
 
 
 def test_a_form_is_one_function_named_after_its_file_and_prints_no_title_page():
@@ -79,7 +83,7 @@ def test_the_title_pages_compile_and_print_their_fields():
     assert "Bienne" in pdf_text(compile_typ('#include "t.typ"\n', files={"t.typ": generated("fr")["titre-bfh.typ"]}, lang="fr")[3])
 
 
-def test_the_nine_document_skeletons_compile():
+def test_the_twelve_document_skeletons_compile():
     exe = typst()
     folder = project()
     shutil.copytree(ROOT / "templates", folder / "templates")
@@ -116,3 +120,36 @@ def test_the_bfh_form_sets_its_sans_font():
     from pypdf import PdfReader
     names = " ".join(str(f.get_object()["/BaseFont"]) for f in PdfReader(str(pdf)).pages[0]["/Resources"]["/Font"].get_object().values())
     assert any(n in names for n in ("Lucida", "Segoe", "Arial")), names
+
+
+def test_the_bfh_form_lets_a_chapter_follow_on_the_same_page():
+    # REQ-008: chapter-break true (the default) starts every chapter on a page of its own, false does not; a value that is not a boolean is refused
+    from pypdf import PdfReader
+    body = '#import "/woodwork/forms/bfh.typ": bfh\n#show: bfh%s\n= Un\nTexte.\n= Deux\nTexte.\n'
+    for arg, pages in (("", 2), (".with(chapter-break: true)", 2), (".with(chapter-break: false)", 1)):
+        ok, _, err, pdf = compile_typ(body % arg, lang="fr")
+        assert ok, (arg, err)
+        assert len(PdfReader(str(pdf)).pages) == pages, arg
+    ok, _, err, _ = compile_typ(body % '.with(chapter-break: "no")', lang="fr")
+    assert not ok
+    message = panic_message(err)
+    assert message is not None and "chapter-break" in message and '"no"' in message, err
+
+
+def test_the_simple_report_prints_its_title_and_two_chapters_on_its_first_page():
+    # REQ-007, UI-001 to UI-003: no title page, the title block then «1 Section», then «2 Annexes»; no outline, no bibliography
+    from pypdf import PdfReader
+    for lang, (name, section, annexes, absent) in SIMPLE.items():
+        text = generated(lang)[name + "/" + name + ".typ"]
+        assert "outline(" not in text and "show-bibliography" not in text, lang
+        text = text.replace('#let project = "', '#let project = "Pont du Ruz ', 1)
+        ok, _, err, pdf = compile_typ('#include "%s/%s.typ"\n' % (name, name), files={name + "/" + name + ".typ": text})
+        assert ok, (lang, err)
+        pages = [" ".join(p.extract_text().split()) for p in PdfReader(str(pdf)).pages]
+        assert len(pages) == 1, (lang, len(pages))
+        first = pages[0]
+        # the form's running header names the page's chapter first («1 Section»): the chapter itself is looked for after the title block
+        title = first.index("Pont du Ruz")
+        assert title < first.index(section, title) < first.index(annexes, title), (lang, first)
+        for word in absent:
+            assert word not in first, (lang, word)
