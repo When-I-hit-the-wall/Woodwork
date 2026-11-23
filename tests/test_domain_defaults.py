@@ -92,3 +92,16 @@ def test_thousands_are_set_apart_by_an_apostrophe():
     t = text_of('#import "/woodwork/lib/number.typ": display-number\n'
                 '#display-number(28000) #display-number(1234.5) #display-number(-12400) #display-number(999) #display-number(123456)\n')
     assert t.splitlines()[0] == "28'000 1'234.5 −12'400 999 1.235 · 10⁵", t
+
+
+def test_calc_defaults_names_every_argument_and_auto_is_not_given():
+    # every default is a named parameter of the signature (so an editor lists them); writing it auto is writing nothing
+    every = 'display: auto, display-formula: auto, display-equation: auto, label-position: auto, label-width: auto, descr-position: auto, norm-position: auto, style: auto, stack: auto, role: auto, level: auto, unit: auto, presets: auto'
+    body = '#var("b", 140, "mm", label: "Largeur")\n#eq("A", `b * b`, label: "Section")\n'
+    plain = text_of('#domain("t")[\n#calc-defaults(label-position: "before", scope: "domain")\n' + body + ']\n')
+    autos = text_of('#domain("t")[\n#calc-defaults(' + every.replace('label-position: auto, ', '') + ', label-position: "before", scope: "domain")\n' + body + ']\n')
+    assert plain == autos, (plain, autos)
+    ok, _, err, _ = compile_typ(HEAD + '#calc-defaults(colour: "red")\n')
+    assert not ok and "colour" in err, err
+    ok, _, err, _ = compile_typ(HEAD + '#calc-defaults(style: "italic")\n')
+    assert not ok and panic_message(err).startswith("calc-defaults: style:"), err

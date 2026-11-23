@@ -1972,9 +1972,6 @@
   var-registry.update(d => set-unit(d, dims-text(clean-dims(p.dims)), written.trim(), scope))
 }
 
-// What `#calc-defaults` may set: every fine argument the lines take, their level, and a unit.
-#let calc-default-names = ("display", "display-formula", "display-equation", "label-position", "descr-position", "norm-position", "label-width", "style", "stack", "role", "level", "unit", "presets")
-
 // References of the block below (moved out of it, issue #115): spec 2026-10-21-commandes-typst-refonte, REQ-006; REQ-007.
 /// Sets the fine arguments of the lines that follow -- the next one (the default), the rest of the domain, or the rest of the document -- where they write none of their own: what to show of them, where their labels, descriptions and citations go, their style, their role, their level, and the unit of a dimension. A line's own argument still wins, then its own `level:`, then these.
 ///
@@ -1992,29 +1989,70 @@
 /// ]
 /// ```
 ///
+/// - display (str, auto): what the lines show, `"none"`, `"variable"`, `"value"`, `"value-unit"` or `"variable-value-unit"` (`#var` and `#verify`).
+/// - display-formula (str, auto): what `#eq` shows of its formula, with the values of `display`.
+/// - display-equation (str, auto): what `#eq` shows of its result, with the values of `display`.
+/// - label-position (str, auto): where the label goes, `"none"`, `"before"`, `"after"`, `"footnote"` or `"left"`.
+/// - label-width (length, ratio, auto): the column of the label under `label-position: "left"`, a length or a ratio.
+/// - descr-position (str, auto): where the description goes, `"none"`, `"after"` or `"footnote"`.
+/// - norm-position (str, auto): where the citation goes, `"none"`, `"in-line"`, `"right"` or `"footnote"`.
+/// - style (str, auto): the style of the lines, `"normal"`, `"bold"`, `"underline"` or `"double"`.
+/// - stack (bool, auto): whether `#eq` stacks its steps, `true` or `false`.
+/// - role (str, auto): the role of the lines, `"data"`, `"compute"` or `"result"`.
+/// - level (int, auto): the level of the lines, 0 to 3.
+/// - unit (str, auto): a unit with a dimension, `"kN"`, `"kNm"`, `"N/mm²"`: the results of that dimension are printed in it.
+/// - presets (str, auto): `"inline"`, the default family of presets, or `"block"`, the same visibility at each level with the label after the line and the citation in the right-hand column, the line set apart (what a generated file writes once at its head).
 /// - scope (str): `"next"` (the default) -- the next line of `#var`, `#eq` or `#verify` --, `"domain"` -- the rest of the `#domain` it stands in, the rest of the document outside every domain --, or `"document"`.
-/// - ..defaults (any): named arguments only, among `display`, `display-formula`, `display-equation`, `label-position`, `label-width` (the column of `label-position: "left"`, a length or a ratio), `descr-position`, `norm-position`, `style`, `stack` (`#eq`'s), `role`, `level`, `unit` -- each with the values the lines take -- and `presets`: `"inline"`, the default family of presets, or `"block"`, the same visibility at each level with the label after the line and the citation in the right-hand column, the line set apart (what a generated file writes once at its head).
 /// -> content
-#let calc-defaults(scope: "next", ..defaults) = {
+#let calc-defaults(
+  display: auto,
+  display-formula: auto,
+  display-equation: auto,
+  label-position: auto,
+  label-width: auto,
+  descr-position: auto,
+  norm-position: auto,
+  style: auto,
+  stack: auto,
+  role: auto,
+  level: auto,
+  unit: auto,
+  presets: auto,
+  scope: "next",
+) = {
   check-scope("calc-defaults", scope)
-  if defaults.pos().len() > 0 { panic("calc-defaults: every default is named -- calc-defaults(norm-position: \"line-right\", scope: \"domain\")") }
-  let given = defaults.named()
+  // Each argument is named in the signature so that an editor lists them; `auto` is "not given", as it was when they were collected by a sink.
+  let given = (
+    display: display,
+    display-formula: display-formula,
+    display-equation: display-equation,
+    label-position: label-position,
+    label-width: label-width,
+    descr-position: descr-position,
+    norm-position: norm-position,
+    style: style,
+    stack: stack,
+    role: role,
+    level: level,
+    unit: unit,
+    presets: presets,
+  )
   let fine = (:)
   let unit-set = none
   for (name, value) in given.pairs() {
-    if not (name in calc-default-names) { panic("calc-defaults: " + repr(name) + " is not a default -- " + calc-default-names.map(n => repr(n)).join(", ")) }
+    if value == auto { continue }
     if name == "level" {
       check-level("calc-defaults", value)
-      if value != auto { fine.insert("level", value) }
+      fine.insert("level", value)
     } else if name == "presets" {
       if not (value in display-families.keys()) { panic("calc-defaults: presets: " + repr(value) + " is not a family of presets -- " + display-families.keys().map(k => repr(k)).join(", ")) }
       fine.insert("presets", value)
     } else if name == "label-width" {
       check-label-width("calc-defaults", value)
-      if value != auto { fine.insert("label-width", value) }
+      fine.insert("label-width", value)
     } else if name == "stack" {
       check-stack("calc-defaults", value)
-      if value != auto { fine.insert("stack", value) }
+      fine.insert("stack", value)
     } else if name == "unit" {
       let written = written-unit(value)
       let p = if type(written) == str { parse-unit(written) } else { none }
@@ -2022,7 +2060,7 @@
       unit-set = (dims: dims-text(clean-dims(p.dims)), written: written.trim())
     } else {
       check-fine("calc-defaults", name, value)
-      if value != auto { fine.insert(name, value) }
+      fine.insert(name, value)
     }
   }
   var-registry.update(d => {
