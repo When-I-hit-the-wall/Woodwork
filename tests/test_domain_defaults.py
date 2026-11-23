@@ -105,3 +105,24 @@ def test_calc_defaults_names_every_argument_and_auto_is_not_given():
     assert not ok and "colour" in err, err
     ok, _, err, _ = compile_typ(HEAD + '#calc-defaults(style: "italic")\n')
     assert not ok and panic_message(err).startswith("calc-defaults: style:"), err
+
+
+def test_block_left_stands_for_block_label_left_35_level_3_for_the_domain():
+    # the engineer's bundle (23.11.2026): one argument for presets, label-position, label-width, level and scope
+    body = """  #var("b", 140, "mm", label: "Largeur", norm: "SIA 265", norm-section: "3.1")
+  #eq("A", `b * b`, label: "Section")
+"""
+    short = text_of('#report-level.update(1)\n#domain("t")[\n#calc-defaults(presets: "block-left")\n' + body + ']\n')
+    long = text_of('#report-level.update(1)\n#domain("t")[\n#calc-defaults(presets: "block", label-position: "left", label-width: 35%, level: 3, scope: "domain")\n' + body + ']\n')
+    assert short == long, (short, long)
+    assert short.splitlines()[0].startswith("Largeur") and "SIA 265 3.1" in short, short
+
+
+def test_an_argument_written_beside_block_left_wins_over_it():
+    t = text_of('#domain("t")[\n#calc-defaults(presets: "block-left", label-position: "after")\n  #var("b", 140, "mm", label: "Largeur")\n]\n')
+    assert not t.startswith("Largeur") and "Largeur" in t, t
+
+
+def test_an_unknown_presets_names_the_families_and_block_left():
+    ok, _, err, _ = compile_typ(HEAD + '#calc-defaults(presets: "blok")\n')
+    assert not ok and '"block-left"' in panic_message(err), err

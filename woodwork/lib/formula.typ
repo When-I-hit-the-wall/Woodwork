@@ -944,6 +944,12 @@
 #let display-presets = json("display-presets.json").commands
 // The families of presets (Q-014, 21.10.2026): `inline`, the default, and `block` -- the same visibility at each level, the label after the line and the citation in the right-hand column, the line set apart, what `note: "line"` printed. A domain chooses one with `#calc-defaults(presets: "block", scope: "domain")`; a line written `note: "line"` is printed with `block`.
 #let display-families = (inline: display-presets, block: json("display-presets.json").block)
+// The bundles of `#calc-defaults` (display-presets.json 1.4, the engineer, 23.11.2026): a name `presets:` may take beside a family, standing for several arguments at once -- `"block-left"`, the `block` family with the label in its left column 35 % wide, at level 3, for the rest of the domain. What the call writes overrides the bundle.
+#let display-bundles = {
+  let b = json("display-presets.json").bundles
+  let _ = b.remove("_comment")
+  b
+}
 
 // The values each fine argument takes: what the engineer listed (20.10.2026), refused otherwise naming the argument and the values (REQ-001). Read from display-presets.json since the spec 2026-10-22-onglet-neige-type (D-17), where Python reads them too (calc/line_display.py): one list for the two.
 #let fine-values = json("display-presets.json").at("fine-values")
@@ -2001,8 +2007,8 @@
 /// - role (str, auto): the role of the lines, `"data"`, `"compute"` or `"result"`.
 /// - level (int, auto): the level of the lines, 0 to 3.
 /// - unit (str, auto): a unit with a dimension, `"kN"`, `"kNm"`, `"N/mm²"`: the results of that dimension are printed in it.
-/// - presets (str, auto): `"inline"`, the default family of presets, or `"block"`, the same visibility at each level with the label after the line and the citation in the right-hand column, the line set apart (what a generated file writes once at its head).
-/// - scope (str): `"next"` (the default) -- the next line of `#var`, `#eq` or `#verify` --, `"domain"` -- the rest of the `#domain` it stands in, the rest of the document outside every domain --, or `"document"`.
+/// - presets (str, auto): `"inline"`, the default family of presets, or `"block"`, the same visibility at each level with the label after the line and the citation in the right-hand column, the line set apart (what a generated file writes once at its head); or `"block-left"`, which stands for `presets: "block"`, `label-position: "left"`, `label-width: 35%`, `level: 3` and `scope: "domain"` at once, each overridden by the same argument written (`lib/display-presets.json`, `bundles`).
+/// - scope (str, auto): `"next"` -- the next line of `#var`, `#eq` or `#verify` --, `"domain"` -- the rest of the `#domain` it stands in, the rest of the document outside every domain --, or `"document"`. auto: `"next"`, or the scope of the bundle `presets:` names.
 /// -> content
 #let calc-defaults(
   display: auto,
@@ -2018,8 +2024,11 @@
   level: auto,
   unit: auto,
   presets: auto,
-  scope: "next",
+  scope: auto,
 ) = {
+  // a bundle (`presets: "block-left"`) stands for the arguments it lists, each one the call writes winning over it
+  let bundle = if type(presets) == str and presets in display-bundles { display-bundles.at(presets) } else { (:) }
+  if scope == auto { scope = bundle.at("scope", default: "next") }
   check-scope("calc-defaults", scope)
   // Each argument is named in the signature so that an editor lists them; `auto` is "not given", as it was when they were collected by a sink.
   let given = (
@@ -2037,6 +2046,13 @@
     unit: unit,
     presets: presets,
   )
+  if bundle.len() > 0 {
+    given.presets = bundle.presets
+    for (name, value) in bundle.pairs() {
+      if name in ("presets", "scope") or given.at(name) != auto { continue }
+      given.insert(name, if name in fine-lengths { length-of(value) } else { value })
+    }
+  }
   let fine = (:)
   let unit-set = none
   for (name, value) in given.pairs() {
@@ -2045,7 +2061,7 @@
       check-level("calc-defaults", value)
       fine.insert("level", value)
     } else if name == "presets" {
-      if not (value in display-families.keys()) { panic("calc-defaults: presets: " + repr(value) + " is not a family of presets -- " + display-families.keys().map(k => repr(k)).join(", ")) }
+      if not (value in display-families.keys()) { panic("calc-defaults: presets: " + repr(value) + " is not a family of presets -- " + (display-families.keys() + display-bundles.keys()).map(k => repr(k)).join(", ")) }
       fine.insert("presets", value)
     } else if name == "label-width" {
       check-label-width("calc-defaults", value)

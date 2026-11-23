@@ -45,6 +45,20 @@ The commands a sheet uses, once it has imported Woodwork from the root of its pr
 
 Without anything written, a line prints its label in a column at the left, then the formula in letters, the same in numbers with their units, and the result; its citation in the right-hand column. This is the `block` family of the display presets at level 3, with `label-position: "left"` and `norm-position: "right"`.
 
+## `#calc-defaults` — the defaults of the lines that follow
+
+```typ
+#domain("Wind-Staudruck")[
+  #calc-defaults(presets: "block-left")
+  #var("q_p0", 0.9, "kN/m²", label: "Referenzwert des Staudrucks")
+]
+```
+
+- It sets the same fine arguments as `#domain` (`display`, `display-formula`, `display-equation`, `label-position`, `label-width`, `descr-position`, `norm-position`, `style`, `stack`, `role`, `level`, `unit`) for the next line (`scope: "next"`, the default), the rest of the domain (`"domain"`) or the rest of the document (`"document"`).
+- **`presets`** chooses the family of display presets: `"inline"` (the label, description and citation in footnotes, the lines run on) or `"block"` (each line apart, the label after it, the citation in the right-hand column).
+- **`presets: "block-left"`** is a bundle: it stands for `presets: "block"`, `label-position: "left"`, `label-width: 35%`, `level: 3` and `scope: "domain"` at once. An argument written beside it wins over the bundle's: `#calc-defaults(presets: "block-left", level: 2)`. The bundles are listed in `woodwork/lib/display-presets.json` (`bundles`).
+- An unknown value of `presets` stops the compile with the families and bundles accepted.
+
 ## `#var`, `#eq`, `#verify`
 
 - `#var("key", value, "unit", label: …)` declares a value. `#var("key", "symbol", value, "unit")` prints another symbol.
