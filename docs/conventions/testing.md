@@ -10,8 +10,11 @@ From `Woodwork/`:
     python tests/run_tests.py --related woodwork/lib/formula.typ
                                               only the test files that name one of these files, plus the previous failures
     python tests/run_tests.py -v              the traceback of a failure
+    python tests/run_tests.py --keep          keep the temporary projects even when every test passed
 
 Standard library only, no framework: a test is a function `test_*` in `tests/test_*.py`; a failure is an `AssertionError` or any exception; `conftest.Skip` skips. Typst 0.15.1 must be on the `PATH` (a test that needs it skips with that reason otherwise). The whole suite is small and runs in the foreground; a file is stopped after 300 s.
+
+The temporary projects the tests compile go into one folder per run in the system's temporary folder (`%TEMP%`, `woodwork-tests-…`), never into the repository: a clone kept in a cloud folder (NextCloud, OneDrive) would otherwise sync a copy of the engine per compile (once 1'722 folders, 212'000 files). The runner removes that folder at the end of the run, and keeps it, printing its path, when a test failed or with `--keep`. A test file run on its own (`python tests/test_x.py` or an import of `conftest`) gets a folder of its own process, removed when it exits.
 
 ## Compiling in a test
 

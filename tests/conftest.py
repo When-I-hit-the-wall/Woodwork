@@ -1,6 +1,8 @@
 """What Woodwork's tests share: the repository's paths, `Skip`, compiling Typst in a temporary project, reading a panic."""
 
+import atexit
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -9,7 +11,19 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 ENGINE = ROOT / "woodwork"
-TMP = ROOT / "tests" / ".tmp"
+
+
+def _tmp():
+    """Where the temporary projects go: the folder `run_tests.py` made for this run (WOODWORK_TMP), else a folder of this process's own, removed when it exits. Both lie in the system's temporary folder (%TEMP%), never in the repository: a clone kept in a cloud folder (NextCloud, OneDrive) would sync every copy of the engine."""
+    given = os.environ.get("WOODWORK_TMP")
+    if given:
+        return Path(given)
+    folder = Path(tempfile.mkdtemp(prefix="woodwork-tests-"))
+    atexit.register(shutil.rmtree, folder, ignore_errors=True)
+    return folder
+
+
+TMP = _tmp()
 
 
 class Skip(Exception):

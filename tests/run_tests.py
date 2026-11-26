@@ -6,15 +6,18 @@
     python tests/run_tests.py --related woodwork/lib/formula.typ
                                               the test files that name one of these files, plus the previous failures
     python tests/run_tests.py -v              the traceback of a failure
+    python tests/run_tests.py --keep          keep the temporary projects even when every test passed
 
-A test is a function `test_*` of a file `tests/test_*.py`. It fails on any exception; `conftest.Skip` skips it. Each file runs in a process of its own (`--one <file>`), stopped after `--timeout` seconds. What failed is kept in `tests/.last-run.json` for `--failed`. Exits 0 when nothing failed.
+A test is a function `test_*` of a file `tests/test_*.py`. It fails on any exception; `conftest.Skip` skips it. Each file runs in a process of its own (`--one <file>`), stopped after `--timeout` seconds. What failed is kept in `tests/.last-run.json` for `--failed`. The temporary projects the tests compile go into one folder of the system's temporary folder (%TEMP%), removed at the end of the run unless a test failed or `--keep` is given; its path is then printed. Exits 0 when nothing failed.
 """
 
 import argparse
 import importlib.util
 import json
 import os
+import shutil
 import subprocess
+import tempfile
 import sys
 import time
 import traceback
@@ -60,6 +63,7 @@ def main():
     parser.add_argument("--failed", action="store_true")
     parser.add_argument("--related", nargs="+", default=None)
     parser.add_argument("-v", action="store_true", dest="verbose")
+    parser.add_argument("--keep", action="store_true")
     parser.add_argument("--timeout", type=int, default=300)
     parser.add_argument("--one", default=None, help=argparse.SUPPRESS)
     parser.add_argument("--only", default=None, help=argparse.SUPPRESS)
@@ -82,6 +86,9 @@ def main():
     if args.pattern:
         files = [f for f in files if args.pattern in f.name or args.pattern in f.read_text(encoding="utf-8")]
 
+    # one folder for the whole run, out of the repository (see conftest._tmp), handed to each test process
+    tmp = tempfile.mkdtemp(prefix="woodwork-tests-")
+    env = dict(os.environ, WOODWORK_TMP=tmp)
     results = []
     start = time.time()
     for f in files:
@@ -91,7 +98,7 @@ def main():
         if only is not None:
             cmd += ["--only", json.dumps(sorted(only))]
         try:
-            proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", timeout=args.timeout)
+            proc = subprocess.run(cmd, cwd=ROOT, env=env, capture_output=True, text=True, encoding="utf-8", timeout=args.timeout)
             lines = [json.loads(l) for l in proc.stdout.splitlines() if l.startswith("{")]
             if proc.returncode != 0 and not lines:
                 lines = [{"test": f.name + "::<import>", "outcome": "failed", "detail": proc.stderr.strip()[-2000:], "time": 0}]
@@ -112,6 +119,10 @@ def main():
     skipped = sum(r["outcome"] == "skipped" for r in results)
     print("%d passed, %d failed, %d skipped in %.1f s" % (passed, len(failed), skipped, time.time() - start))
     LAST.write_text(json.dumps([r["test"] for r in failed]), encoding="utf-8", newline="\n")
+    if failed or args.keep:
+        print("temporary projects kept in %s" % tmp)
+    else:
+        shutil.rmtree(tmp, ignore_errors=True)
     return 1 if failed else 0
 
 
