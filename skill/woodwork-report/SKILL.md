@@ -25,6 +25,7 @@ Uploaded to claude.ai, the skill holds `assets/woodwork.json`, `assets/sheets.js
 - **Typst alone in the user's project.** The user compiles with Typst 0.15.1 and nothing else. Copy files and run `typst`; never add a Python script, a package or a build step to the project.
 - **A norm value is read, never typed.** Every strength, factor or constant of a norm comes from `woodwork/data/`, through `#material` or `#var(…, from:, path:)`. Never write a norm value from memory. If the value the user needs is not in `woodwork/data/` (grep its folder), say so and ask the user for the value and its source; then write it as the user's own value, with its source in the label.
 - **A clause is cited only when it is known.** Write `norm-section:` only for a clause a Woodwork sheet already cites for the same thing, a clause `woodwork/data/` names, or one the user gives. Otherwise write no citation rather than a guessed one.
+- **A value taken from elsewhere cites its source.** A variable read from another domain or file carries `(#ref-calc(<label>))` in its label, pointing at the place it is set (see «House style»).
 - **Never edit `.woodwork/` (or `woodwork/`)** in the user's project. Its look is chosen with a form; its values are overridden on a line (`#material("GL24h", f_t_0_d: 11.0)`).
 - **The user's language.** Use the sheets and templates of the language of the report (`fr`, `de` or `en`), and write text, labels and headings in it.
 
@@ -75,6 +76,36 @@ The root of the project is the Typst root (`--root .`): every file imports by an
   let lv = int(sys.inputs.at("level", default: "2"))
   assert(lv in (1, 2, 3), message: "invalid --input level=" + str(lv) + ", expected 1, 2, or 3")
   report-level.update(lv)
+}
+
+// A citation in grey and small, as the engine prints one in its right-hand column (8 pt, ink-soft of Woodwork's palette).
+#let norm-grau(body) = text(size: 8pt, fill: rgb("#5b646c"), body)
+
+// A line of text -- a word rather than a number -- on the grid of the calculation lines: the label at the left, the value, the citation at the right in grey.
+// The label column is as wide as that of #var/#eq with label-position "left": label-width (35 % as Woodwork's block-left; else the same as the domain's calc-defaults) of the line's width less the citation column (3.8 cm + 0.6 cm), then 0.6 cm of gap.
+// Example: #line-text[Baugrundklasse][E][SIA 261 Tabelle 24]
+#let line-text(bezeichnung, wert, norm, label-width: 35%) = layout(size => {
+  let room = size.width - 3.8cm - 0.6cm
+  let w = if type(label-width) == ratio { label-width * room } else { label-width }
+  block(grid(
+    columns: (w, 1fr, auto),
+    column-gutter: 0.6cm,
+    align: (left, left, right + bottom),
+    bezeichnung, wert, norm-grau(norm),
+  ))
+})
+
+// A reference to the place in the report where a value is set: a link, with the section's number and the page.
+// At the source, a label:   #metadata("gk_ak_gew") <Dome_dach-gk_ak_gew>   (or the domain's own <ID-presets>)
+// Then, e.g. in a label:    label: [Ständige Lasten Dach, gewählt (#ref-calc(<Dome_dach-gk_ak_gew>))]
+#let ref-calc(ziel) = context {
+  let loc = locate(ziel)
+  let h = query(selector(heading).before(loc)).filter(h => h.numbering != none)
+  let abschnitt = if h.len() > 0 {
+    let n = counter(heading).at(loc)
+    [Abschnitt #numbering(h.last().numbering, ..n), ]
+  } else { [] }
+  link(ziel)[siehe #abschnitt;S. #counter(page).at(loc).first()]
 }
 ```
 
@@ -184,6 +215,27 @@ In the project, the first line is `#import "/000-Typst-Config/commands.typ": *` 
 - **Banners**: the main parts, in this order where they apply, `// ═══════════════ STATISCHES SYSTEM ═══════════════`, `EINWIRKUNGEN`, `WIDERSTAND`, `NACHWEIS` (in the report's language); the sub-parts `// ─── Geometrie ───`; a blank line between blocks. A visible sub-heading inside a calculation is bold (`*Nutzlasten*`), never italic, just under its banner.
 - **Input values stay as individual `#var` lines.** Do not gather them into a `#var-table` at the head of a check.
 - **Keys** are symbols: the part before the first `_` is the letter (a Greek name gives its letter, `sigma` → σ), every part after is an index: `sigma_m_d` → σ<sub>m,d</sub>. In formulas use the keys, `*` to multiply, `^` for a power, a literal with its unit in quotes: `(3 "m")`. An exponent right after the quote belongs to the unit: `10 "m"^2` = 10 m² (as `10 "m^2"`); `(10 "m")^2` = 100 m².
+- **A value taken from elsewhere cites where it comes from, with `#ref-calc`.** Whenever a calculation reads a variable of another domain or another file (`#var("q_k1", domain: "Dome_schnee")`), its label ends with `(#ref-calc(<label>))`, which prints «siehe Abschnitt 4.2, S. 12» as a link to the source. The label at the source is the domain's own `<ID-presets>` (on its `#calc-defaults`), or, to point at one line, a `#metadata("key") <Domain-key>` written just beside that line in the source file. Write the reading line in full:
+
+  ```typ
+  // in Einwirkungen/Auflast-Dach.typ, beside the line that sets the value
+  #metadata("gk_ak_gew") <Dome_dach-gk_ak_gew>
+
+  // in the calculation that reads it
+  #var(
+    "gk_ak_gew",
+    domain: "Dome_dach",
+    label: [Ständige Lasten Dach, gewählt (#ref-calc(<Dome_dach-gk_ak_gew>))],
+  )
+  #var(
+    "q_k1",
+    domain: "Dome_schnee",
+    label: [Schneelast (#ref-calc(<Dome_schnee-presets>))],
+  )
+  ```
+
+  A `<label>` must be unique in the whole report: name it `<Domain-key>` or `<Domain-presets>`. A label that does not exist stops the compile («label does not exist in the document»): add it at the source.
+- **A value that is a word** -- a ground class, a terrain category, a zone -- is written with `#line-text[label][value][citation]`, which prints it on the grid of the calculation lines: `#line-text[Baugrundklasse][E][SIA 261 Tabelle 24]`, `#line-text[Geländekategorie][IIa][SIA 261 Tabelle 4]`. Nothing is stored: a formula cannot read it. In a domain whose label column is not 35 % wide, give the same width: `#line-text(label-width: 30%)[…][…][…]`. The citation may be empty (`[]`).
 - **Units** as a report prints them: `mm`, `kN`, `kNm`, `N/mm²`, `mm²`, `kN/m`. The engine converts.
 - `#material("GL24h", moisture: 1)` reads a strength class of SIA 265 Tabelle 8 or 9 and publishes its design values (`f_m_d`, `f_t_0_d`, `f_c_0_d`, `f_c_90_d`, `f_v_d`, `E_0_mean`, …); `#var("key", from: "sia265/<file>", path: "<keys.joined.by.dots>")` reads a constant of a norm table; `#eq(…, cases:)` computes by cases.
 
