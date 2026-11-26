@@ -32,3 +32,21 @@ def test_units_is_a_list():
     assert not ok and 'units: ("Nm",)' in panic_message(err), err
     ok, _, err, _ = compile_typ(HEAD + '#domain("m", units: ("Nmx",))[]\n')
     assert not ok and "is not a unit" in panic_message(err), err
+
+
+def test_an_exponent_after_a_literal_unit_is_the_unit_s():
+    # `10 "m"^2` is 10 m², `(10 "m")^2` is 100 m² (the engineer, 26.11.2026)
+    ok, _, err, pdf = compile_typ(HEAD + """#domain("p")[
+  #eq("a", `10 "m"^2`, unit: "m²", label: "A")
+  #eq("b", `(10 "m")^2`, unit: "m²", label: "B")
+  #eq("c", `10 "m^2"`, unit: "m²", label: "C")
+  #eq("d", `2 "kN/m"^2`, unit: "kN/m²", label: "D")
+  #eq("e", `2 "m" * 3 "m"^2`, unit: "m³", label: "E")
+]
+""")
+    assert ok, err
+    t = pdf_text(pdf)
+    assert "= 10 m²" in t and "= 100 m²" in t, t
+    assert "^" not in t, t
+    assert "= 2 kN/m²" in t, t
+    assert "= 6 m³" in t, t

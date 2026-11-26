@@ -647,6 +647,16 @@
   out
 }
 
+// The unit of a literal, with the exponent written after its closing quote taken into it: `10 "m"^2` is 10 m², not (10 m)² = 100 m², and `2 "kN/m"^2` is 2 kN/m² (the engineer, 26.11.2026: «10m^2 au lieu de (10m)^2»). The page printed `10 m²` while the algebra squared the 10 -- the one reading of the two that nobody means; a power of the whole quantity is written with its brackets, `(10 "m")^2`, and is left alone. A caret written inside the quotes, `10 "m^2"`, is turned into its superscript the same way, so that the letters line does not print the caret (written-unit). Only a quoted unit right after a number is touched: `x_"eff"^2` is a symbol, and keeps its power.
+#let literal-units(src) = {
+  if type(src) != str or not src.contains("\"") { return src }
+  src.replace(regex("([0-9.])(\s*)\"([^\"\\\\]*)\"(?:\s*\^\s*([0-9]+)([^.0-9]|$))?"), m => {
+    let (digit, space, unit, expo, after) = m.captures
+    let unit = if expo == none { unit } else { unit + "^" + expo }
+    digit + space + "\"" + written-unit(unit) + "\"" + (if after == none { "" } else { after })
+  })
+}
+
 // The levels a command of this file may be given: `auto` follows the report, **0 prints nothing**, and 1, 2 and 3 are the three reports of section 3.7.
 //
 // ⚠️ **0 is the one level that prints nothing, and every other level prints something** (v0.85, the engineer's rule in his own words: «tout autre chose que level:0 doit toujours afficher quelque chose»). Until then it was `level: 1` that hid a declaration, which put the two notions on one scale and made the *client* report -- level 1, section 3.7 -- the one report a variable written by hand never reached. They are apart now: 0 says "not on the page", 1, 2 and 3 say how much of the page it takes, and `#var` prints at level 1 exactly what it prints at level 2.
@@ -1648,7 +1658,7 @@
 // --- A formula by cases (founding spec Q-012) -----------------------------------------------------
 // `#eq("k_m", cases: ((`lambda_rel_m <= 0.75`, `1`), (`lambda_rel_m <= 1.4`, `1.56 - 0.75 * lambda_rel_m`), (auto, `1 / lambda_rel_m^2`)))`: the first condition that holds chooses the formula; `auto` holds always, and stands last. A condition is a relation between two formulas, read as #verify reads one.
 #let case-ops = ("<=", ">=", "!=", "==", "≤", "≥", "≠", "<", ">", "=")
-#let case-source(x) = star-as-dot(if type(x) == str { x } else if type(x) == content and x.func() == raw { x.text } else { panic("eq: cases: a condition and a formula are written in a raw block, `a <= b` -- got " + repr(x)) })
+#let case-source(x) = literal-units(star-as-dot(if type(x) == str { x } else if type(x) == content and x.func() == raw { x.text } else { panic("eq: cases: a condition and a formula are written in a raw block, `a <= b` -- got " + repr(x)) }))
 #let check-cases(cases) = {
   if type(cases) != array or cases.len() == 0 { panic("eq: cases: is a list of (condition, formula) pairs, the last condition auto -- got " + repr(cases)) }
   for (i, c) in cases.enumerate() {
@@ -1829,8 +1839,8 @@
   if not has-symbol { check-printable-key("eq", key) }
   let symbol = if has-symbol { quoted-words(tail.at(0)) } else { key-symbol(key) }
   let formula = tail.at(if has-symbol { 1 } else { 0 })
-  // a `*` is a product, printed as `dot` (star-as-dot)
-  let src = star-as-dot(if type(formula) == str { formula } else { formula.text })
+  // a `*` is a product, printed as `dot` (star-as-dot); a literal's `"m"^2` is its unit squared (literal-units)
+  let src = literal-units(star-as-dot(if type(formula) == str { formula } else { formula.text }))
 
   // the two the body reads under their older names: `unit` and `value` are the *arguments*, and reading them as `want` and `given` keeps every line below saying which of the two it means
   let want = written-unit(unit)
@@ -2335,8 +2345,8 @@
 // `written`, `prefix` and `extras` are the public `#verify`'s (spec 2026-10-21-commandes-typst-refonte, REQ-004): the fine arguments it was written with, resolved here against the layers of REQ-007 -- `display` taking the place of the level's scale --, the printed name it sets before the relation (`name-visible`), and its label, description and citation, placed as `#var` places them. The engine's own callers give none of them and print by the level, as they always did.
 #let verify-core(relation, level: auto, brief: false, left-unit: none, left-only: false, id: none, written: none, prefix: none, extras: none) = context {
   check-level("verify", level)
-  // a `*` is a product, printed as `dot` (star-as-dot)
-  let src = star-as-dot(if type(relation) == str { relation } else { relation.text })
+  // a `*` is a product, printed as `dot` (star-as-dot); a literal's `"m"^2` is its unit squared (literal-units)
+  let src = literal-units(star-as-dot(if type(relation) == str { relation } else { relation.text }))
   // In list order, so a `<=` is never read as a `<`; the first operator found wins.
   let found = none
   for o in relation-ops {
@@ -2506,8 +2516,8 @@
   let written = written-fine("verify", (display: display, label-position: label-position, descr-position: descr-position, norm-position: norm-position))
   check-label-width("verify", label-width)
   if label-width != auto { written.insert("label-width", label-width) }
-  // a `*` is a product, printed as `dot` (star-as-dot)
-  let src = star-as-dot(if type(relation) == str { relation } else { relation.text })
+  // a `*` is a product, printed as `dot` (star-as-dot); a literal's `"m"^2` is its unit squared (literal-units)
+  let src = literal-units(star-as-dot(if type(relation) == str { relation } else { relation.text }))
   let split = relation-split(src)
   let named = name-calc != none or name-visible != none
   if named and split.op in ("=", "==", "!=", "≠") {

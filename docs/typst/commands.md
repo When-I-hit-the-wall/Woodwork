@@ -63,6 +63,7 @@ Without anything written, a line prints its label in a column at the left, then 
 
 - `#var("key", value, "unit", label: …)` declares a value. `#var("key", "symbol", value, "unit")` prints another symbol.
 - `#eq("key", `formula`, label: …)` computes a value from the variables above it, in Typst, with units; `unit:` converts the result, `value:` gives it for a formula Typst cannot evaluate.
+- A number in a formula carries its unit in quotes: `350 "m"`, `0.4 "kN/m²"`. An exponent written right after the quote belongs to the unit: `10 "m"^2` and `10 "m^2"` are 10 m², `2 "kN/m"^2` is 2 kN/m²; a power of the whole quantity takes its brackets, `(10 "m")^2` = 100 m².
 - `#verify(`a <= b`, label: …)` checks a relation and marks it ✓ or ✘ under a double rule. With `name-calc: "eta", name-visible: "eta"` it prints the ratio against 1, `η = σ/f = 6.429/12.8 = 0.502 ⩽ 1`, and stores `eta`.
 - Their arguments are Woodcore's: `label`, `label-position`, `label-width`, `descr`, `descr-position`, `norm`, `norm-section`, `norm-position`, `display`/`display-formula`/`display-equation`, `style`, `stack`, `role`, `id`, `level`.
 
